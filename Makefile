@@ -27,7 +27,7 @@ all: $(NAME)
 $(NAME):
 	(cd $(LIBDIR); $(MAKE) all)
 	(cd $(MLXDIR); $(MAKE) all)
-	(cd $(SRCDIR);$(CC) $(FLAGS) -c $(SRC) -I ../$(INCDIR) -I ../$(LIBDIR)includes/;mv $(OBJ) ../obj)
+	(cd $(SRCDIR);$(CC) $(FLAGS) -c $(SRC) -I ../$(INCDIR) -I ../$(MLXDIR) -I ../$(LIBDIR)includes/;mv $(OBJ) ../obj)
 	(cd $(OBJDIR);$(CC) $(FLAGS) -o ../$(NAME) $(OBJ) -L ../$(LIBDIR) -L ../$(MLXDIR) -lft -lmlx -framework OpenGL -framework AppKit)
 
 clean:
