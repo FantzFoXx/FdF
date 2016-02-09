@@ -6,7 +6,7 @@
 #    By: udelorme <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/01/14 11:43:18 by udelorme          #+#    #+#              #
-#    Updated: 2016/01/28 10:54:59 by udelorme         ###   ########.fr        #
+#    Updated: 2016/02/09 10:47:37 by udelorme         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ $(NAME):
 	(cd $(LIBDIR); $(MAKE) all)
 	(cd $(MLXDIR); $(MAKE) all)
 	(cd $(SRCDIR);$(CC) $(FLAGS) -c $(SRC) -I ../$(INCDIR) -I ../$(LIBDIR)includes/;mv $(OBJ) ../obj)
-	(cd $(OBJDIR);$(CC) $(FLAGS) -o ../$(NAME) $(OBJ) -L ../$(LIBDIR) -L ../$(MLXDIR) -lft -lmlx)
+	(cd $(OBJDIR);$(CC) $(FLAGS) -o ../$(NAME) $(OBJ) -L ../$(LIBDIR) -L ../$(MLXDIR) -lft -lmlx -framework OpenGL -framework AppKit)
 
 clean:
 	(cd $(OBJDIR); rm -rf $(OBJ))
