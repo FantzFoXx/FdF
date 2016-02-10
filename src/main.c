@@ -51,7 +51,7 @@ void		t_coord_push_down(t_coord **first, t_coord *new)
 	}
 }
 
-void	ligne(void *mlx, void *wnd, t_coord point_a, t_coord point_b)
+void	draw_segment(void *mlx, void *wnd, t_coord *point_a, t_coord *point_b)
 {
 	t_coord d_point;
 	t_coord index;
@@ -60,10 +60,10 @@ void	ligne(void *mlx, void *wnd, t_coord point_a, t_coord point_b)
 	int	yinc;
 	int	cumul;
 
-	index.x = point_a.x;
-	index.y = point_a.y;
-	d_point.x = point_b.x - point_a.x;
-	d_point.y = point_b.y - point_a.y;
+	index.x = point_a->x;
+	index.y = point_a->y;
+	d_point.x = point_b->x - point_a->x;
+	d_point.y = point_b->y - point_a->y;
 	xinc = ( d_point.x > 0 ) ? 1 : -1;
 	yinc = ( d_point.y > 0 ) ? 1 : -1;
 	d_point.x = ABSOL(d_point.x);
@@ -81,7 +81,7 @@ void	ligne(void *mlx, void *wnd, t_coord point_a, t_coord point_b)
 				cumul -= d_point.x;
 				index.y += yinc; 
 			}
-			mlx_pixel_put(mlx, wnd, index.x, index.y, 255);
+			mlx_pixel_put(mlx, wnd, index.x + 10, index.y + 10, 255);
 		} 
 	}
 	else 
@@ -96,7 +96,7 @@ void	ligne(void *mlx, void *wnd, t_coord point_a, t_coord point_b)
 				cumul -= d_point.y;
 				index.x += xinc; 
 			}
-			mlx_pixel_put(mlx, wnd, index.x, index.y, 255);
+			mlx_pixel_put(mlx, wnd, index.x + 10, index.y + 10, 255);
 		}
 	}
 }
@@ -117,23 +117,33 @@ void		link_dots(t_coord *map)
 
 t_coord		*create_map(t_coord *map, int x_dots, int y_dots, int space)
 {
+	int		x;
+	int		y;
 	t_coord *index;
 	int		y_bak;
+	int		first_map;
 
 	y_bak = y_dots;
-	index = t_coord_new(0, 0);
-	map = index;
-	while (x_dots >= 0)
+	first_map = 1;
+	x = 0;
+	y = 0;
+	while (x <= x_dots)
 	{
-		y_dots = y_bak;
-		while (y_dots >= 0)
+		y = 0;
+		while (y <= y_dots)
 		{
-			t_coord_push_down(&index, t_coord_new(space * x_dots, space * y_dots));
-			y_dots--;
+			ft_nbrtrace("y_dots", y_dots);
+			ft_nbrtrace("y", y_dots * space);
+			t_coord_push_down(&index, t_coord_new(space * x, space * y));
+			if (first_map)
+				map = index;
+			first_map = 0;
+			y++;
 		}
-		t_coord_push_right(&index, t_coord_new(space * x_dots, space * y_dots));
+		y--;
+		t_coord_push_right(&index, t_coord_new(space * x, space * y));
 		index = index->right;
-		x_dots--;
+		x++;
 	}
 	link_dots(map);
 	return (map);
@@ -141,15 +151,41 @@ t_coord		*create_map(t_coord *map, int x_dots, int y_dots, int space)
 
 void	print_map(t_meta env, t_coord *map)
 {
+	int i;
 	t_coord *index;
 	index = map;
+	i = 255;
 	while (map)
 	{
 		index = map;
 		while (index)
 		{
-			mlx_pixel_put(env.mlx, env.wnd, index->x, index->y, 255);
+			mlx_pixel_put(env.mlx, env.wnd, index->x, index->y, i--);
 			index = index->down;
+		}
+		map = map->right;
+	}
+}
+
+void	ab_segment(t_meta env, t_coord *map)
+{
+	int i;
+	t_coord *index;
+	index = map;
+	i = 0;
+	while (map)
+	{
+		index = map;
+		while (index->down)
+		{
+			printf("x : %d\ny : %d\n\n", index->x, index->y);
+			ft_nbrtrace("pass", i);
+			if (index->right)
+				draw_segment(env.mlx, env.wnd, index, index->right);
+			if (index->down)
+				draw_segment(env.mlx, env.wnd, index, index->down);
+			index = index->down;
+			i++;
 		}
 		map = map->right;
 	}
@@ -162,12 +198,13 @@ int		main(void)
 	t_coord *map;
 
 	map = NULL;
-	begin.x = 100;
-	begin.y = 100;
+	begin.x = 0;
+	begin.y = 0;
 	env.mlx = mlx_init();
 	env.wnd = mlx_new_window(env.mlx, WIDTH, HEIGHT, "Test 1");
-	map = create_map(map, 10, 10, 20);
+	map = create_map(map, 10, 10, 100);
 	print_map(env, map);
+	ab_segment(env, map);
 	mlx_loop(env.mlx);
 	return (0);
 }

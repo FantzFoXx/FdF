@@ -7,8 +7,8 @@
 
 typedef struct	s_coord
 {
-	float		x;
-	float	y;
+	int		x;
+	int	y;
 	struct s_coord *right;
 	struct s_coord *down;
 }				t_coord;
