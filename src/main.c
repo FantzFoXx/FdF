@@ -13,9 +13,7 @@ t_pitch_map		*t_pitch_new(char *line)
 	new = (t_pitch_map *)malloc(sizeof(t_pitch_map));
 	if (new)
 	{
-		ft_trace("split_b", "pass");
 		new->line = ft_strsplit(line, ' ');
-		ft_trace("split_a", "pass");
 		new->next = NULL;
 	}
 	return (new);
@@ -159,7 +157,7 @@ t_coord		*create_map(t_coord *map, int x_dots, int y_dots, int space)
 	first_map = 1;
 	while (x <= x_dots)
 	{
-		t_coord_push_right(&index, t_coord_new(space * x + 50 + i, (space / 1.5) * y + 50 + i, ind++));
+		t_coord_push_right(&index, t_coord_new(space * x + 50, (space / 1.5) * y + 50, ind++));
 		if (first_map)
 			map = index;
 		first_map = 0;
@@ -228,22 +226,25 @@ void	apply_pitch_map(t_coord *map, t_pitch_map *pitch)
 {
 	t_coord		*index;
 	int			i;
+	int			x_pitch;
 
 	index = map;
 	i = 0;
+	x_pitch = 0;
 	while (map && pitch)
 	{
-		ft_trace(NULL, "pass");
 		index = map;
 		i = 0;
+		x_pitch = 0;
 		while (index && pitch->line[i])
 		{
-			ft_nbrtrace("atoi", ft_atoi(pitch->line[i]));
-			index->y -= (ft_atoi(pitch->line[i]) * 3);
-			index->y -= 0;
+			index->y -= (ft_atoi(pitch->line[i]) * 4);
+			index->y += x_pitch;
 			index = index->right;
 			i++;
+			x_pitch += 5;
 		}
+			index->y += x_pitch;
 		pitch = pitch->next;
 		map = map->down;
 	}
@@ -277,11 +278,9 @@ int		main(int argc, char **argv)
 		{
 			line_size = 0;
 			nb_line = 0;
-			ft_trace("fd", "pass");
 			while (get_next_line(fd, &line) > 0)
 			{
 				nb_line++;
-				ft_trace("gnl", "pass");
 				line_size = ft_wordcount(line, ' ');
 				t_pitch_push(&pitch, t_pitch_new(line));
 				free(line);
