@@ -1,86 +1,32 @@
 #include <unistd.h>
 #include "fdf.h"
-#include <mlx.h>
+#include "mlx.h"
 #include <math.h>
 #include "libft.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include "libft.h"
+#include "get_next_line.h"
+#include "catch_errors.h"
+#include "t_map.h"
 
-t_pitch_map		*t_pitch_new(char *line)
+static void		img_put_pixel(t_img_prop img, int x, int y, unsigned color)
 {
-	t_pitch_map *new;
+	int	final;
+	(void)color;
 
-	new = (t_pitch_map *)malloc(sizeof(t_pitch_map));
-	if (new)
-	{
-		new->line = ft_strsplit(line, ' ');
-		new->next = NULL;
-	}
-	return (new);
+	x *= (img.bits_per_pixel / 8);
+	y *= img.size_line;
+
+	final = x + y;
+	img.img_addr[final + 0] = 255;
+	img.img_addr[final + 1] = 0;
+	img.img_addr[final + 2] = 55;
+	img.img_addr[final + 3] = 50;
 }
 
-void		t_pitch_push(t_pitch_map **first, t_pitch_map *new)
-{
-	t_pitch_map *index;
-
-	index = *first;
-	if (!index)
-		*first = new;
-	else
-	{
-		while (index->next)
-			index = index->next;
-		index->next = new;
-	}
-}
-
-t_coord		*t_coord_new(int x, int y, int index)
-{
-	t_coord *new;
-
-	new = (t_coord *)malloc(sizeof(t_coord));
-	if (new)
-	{
-		new->x = x;
-		new->y = y;
-		new->index = index;
-		new->right = NULL;
-		new->down = NULL;
-	}
-	return (new);
-}
-
-void		t_coord_push_right(t_coord **first, t_coord *new)
-{
-	t_coord *index;
-
-	index = *first;
-	if (!index)
-		*first = new;
-	else
-	{
-		while (index->right)
-			index = index->right;
-		index->right = new;
-	}
-}
-
-void		t_coord_push_down(t_coord **first, t_coord *new)
-{
-	t_coord *index;
-
-	index = *first;
-	if (!index)
-		*first = new;
-	else
-	{
-		while (index->down)
-			index = index->down;
-		index->down = new;
-	}
-}
-
-void	draw_segment(void *mlx, void *wnd, t_coord *point_a, t_coord *point_b, int color)
+void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, int color)
 {
 	t_coord d_point;
 	t_coord index;
@@ -97,7 +43,7 @@ void	draw_segment(void *mlx, void *wnd, t_coord *point_a, t_coord *point_b, int 
 	yinc = ( d_point.y > 0 ) ? 1 : -1;
 	d_point.x = ABSOL(d_point.x);
 	d_point.y = ABSOL(d_point.y);
-	mlx_pixel_put(mlx, wnd, index.x, index.y, color);
+	img_put_pixel(img, index.x, index.y, color);
 	if (d_point.x > d_point.y)
 	{
 		cumul = d_point.x / 2;
@@ -110,7 +56,7 @@ void	draw_segment(void *mlx, void *wnd, t_coord *point_a, t_coord *point_b, int 
 				cumul -= d_point.x;
 				index.y += yinc; 
 			}
-			mlx_pixel_put(mlx, wnd, index.x, index.y, color);
+			img_put_pixel(img, index.x, index.y, color);
 		} 
 	}
 	else 
@@ -125,173 +71,88 @@ void	draw_segment(void *mlx, void *wnd, t_coord *point_a, t_coord *point_b, int 
 				cumul -= d_point.y;
 				index.x += xinc; 
 			}
-			mlx_pixel_put(mlx, wnd, index.x, index.y, color);
+			img_put_pixel(img, index.x, index.y, color);
 		}
 	}
 }
 
-void		link_dots(t_coord *map)
+static t_map	*init_map(int fd)
 {
-	if (map->right && map->right->right)
-		link_dots(map->right);
-	if (map->right && map->down)
-	{
-		map->down->right = map->right->down;
-		link_dots(map->down);
-	}
-}
+	char *line;
+	t_map *map;
+	t_map *index;
+	size_t	line_nb;
 
-t_coord		*create_map(t_coord *map, int x_dots, int y_dots, int space)
-{
-	int		x;
-	int		y;
-	t_coord *index;
-	int		first_map;
-	int		ind;
-	int		i;
-
-	x = 0;
-	y = 0;
-	ind = 0;
-	i = 0;
-	first_map = 1;
-	while (x <= x_dots)
+	map = NULL;
+	line_nb = 0;
+	index = map;
+	while (get_next_line(fd, &line) > 0)
 	{
-		t_coord_push_right(&index, t_coord_new(space * x + 50, (space / 1.5) * y + 50, ind++));
-		if (first_map)
-			map = index;
-		first_map = 0;
-		x++;
-		i += 2;
+		t_map_push(&map, t_map_new(line, line_nb));
+		free(line);
+		line_nb++;
 	}
-	x = 0;
-	while (index)
-	{
-		i = 0;
-		y = 1;
-		while (y <= y_dots)
-		{
-			i += 15;
-			t_coord_push_down(&index, t_coord_new(space * x + 50 + i, (space / 1.5) * y + 50 + i, ind++));
-			y++;
-		}
-		index = index->right;
-		x++;
-	}
-	link_dots(map);
+	
 	return (map);
 }
 
-static void	ab_segment(t_meta env, t_coord *map)
+static void trace_map(t_meta env, t_map *map)
 {
 	int i;
-	t_coord *index;
-	index = map;
+
 	i = 0;
-	while (map)
+	while (map->next)
 	{
-		index = map;
-		while (index)
+		ft_trace(NULL, "pass");
+		ft_nbrtrace("value", map->p[i].next);
+		while (map->p[i].next == 1)
 		{
-			if (index->right)
-				draw_segment(env.mlx, env.wnd, index, index->right, 0x33CCFF);
-			if (index->down)
-				draw_segment(env.mlx, env.wnd, index, index->down, 0x33CCFF);
-			index = index->down;
+			draw_segment(env.img, &map->p[i], &map->p[i + 1], 255);
+			ft_nbrtrace("value point y : ", map->p[i].y);
+			ft_nbrtrace("value point x : ", map->p[i].x);
+			draw_segment(env.img, &map->p[i], &map->next->p[i], 255);
 			i++;
 		}
-		map = map->right;
-	}
-}
-
-void	print_map(t_meta env, t_coord *map)
-{
-	int i;
-	t_coord *index;
-	index = map;
-	i = 255;
-	while (map)
-	{
-		index = map;
-		while (index)
-		{
-			mlx_pixel_put(env.mlx, env.wnd, index->x + 50, index->y + 50, i--);
-			index = index->down;
-		}
-		map = map->right;
-	}
-}
-
-void	apply_pitch_map(t_coord *map, t_pitch_map *pitch)
-{
-	t_coord		*index;
-	int			i;
-	int			x_pitch;
-
-	index = map;
-	i = 0;
-	x_pitch = 0;
-	while (map && pitch)
-	{
-		index = map;
 		i = 0;
-		x_pitch = 0;
-		while (index && pitch->line[i])
-		{
-			index->y -= (ft_atoi(pitch->line[i]) * 4);
-			index->y += x_pitch;
-			index = index->right;
-			i++;
-			x_pitch += 5;
-		}
-			index->y += x_pitch;
-		pitch = pitch->next;
-		map = map->down;
+		map = map->next;
 	}
+}
+
+static int open_file(int ac, char **av)
+{
+	int fd;
+
+	check_params(ac);
+	fd = open(av[1], O_RDONLY);
+	if (fd == -1)
+		catch_errors(1, av[1]);
+	return (fd);
 }
 
 int		main(int argc, char **argv)
 {
 	t_meta	env;
-	t_coord	begin;
-	t_coord *map;
-	t_pitch_map *pitch;
-	char *line;
-	int fd;
-	int	line_size;
-	int	nb_line;
+	int		fd;
+	t_map	*map;
 
-	map = NULL;
-	begin.x = 0;
-	begin.y = 0;
-	line_size = 10;
-	nb_line = 10;
+	fd = open_file(argc, argv);
+	map = init_map(fd);
+	close(fd);
 	env.mlx = mlx_init();
-	env.wnd = mlx_new_window(env.mlx, WIDTH, HEIGHT, "Test 1");
-	fd = 0;
-	line = NULL;
-	pitch = NULL;
-	if (argc == 2)
-	{
-		fd = open(argv[1], O_RDONLY);
-		if (fd)
-		{
-			line_size = 0;
-			nb_line = 0;
-			while (get_next_line(fd, &line) > 0)
-			{
-				nb_line++;
-				line_size = ft_wordcount(line, ' ');
-				t_pitch_push(&pitch, t_pitch_new(line));
-				free(line);
-			}
-		}
-		close(fd);
-	}
-	map = create_map(map, line_size, nb_line, 70);
-	apply_pitch_map(map, pitch);
-	//print_map(env, map);
-	ab_segment(env, map);
+	env.wnd = mlx_new_window(env.mlx, WIDTH, HEIGHT, "Fdf");
+	env.img.img_ptr = mlx_new_image(env.mlx, WIDTH, HEIGHT);	
+	env.img.img_addr = mlx_get_data_addr(env.img.img_ptr, &(env.img.bits_per_pixel), &(env.img.size_line), &(env.img.endian));
+	
+
+
+
+	printf("bits_per_pixel : %d / size_line : %d / endian : %d\n", env.img.bits_per_pixel, env.img.size_line, env.img.endian);
+	//put_points(map, env);
+	trace_map(env, map);
+
+	//draw_segment(env.img, &a, &b, 255);
+	mlx_put_image_to_window (env.mlx, env.wnd, env.img.img_ptr, 10, 10 );
+
 	mlx_loop(env.mlx);
 	return (0);
 }

@@ -1,0 +1,7 @@
+########## fdf properties list : ############
+
+- n'accpete q'une map a la fois
+- peut prendre 2 autres args
+	- le zoom de base
+	- la taille du pitch
+
