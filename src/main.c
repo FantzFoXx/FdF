@@ -29,7 +29,7 @@ static void		img_put_pixel(t_img_prop img, int x, int y, int color)
 	img.img_addr[final + 3] = col[3];
 }
 
-void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, int color)
+void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, double pitch)
 {
 	t_coord d_point;
 	t_coord index;
@@ -37,6 +37,8 @@ void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, int color)
 	int	xinc;
 	int	yinc;
 	int	cumul;
+
+
 
 	index.x = point_a->x;
 	index.y = point_a->y;
@@ -47,7 +49,8 @@ void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, int color)
 	d_point.x = ABSOL(d_point.x);
 	d_point.y = ABSOL(d_point.y);
 	if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-		img_put_pixel(img, index.x, index.y, color);
+		//img_put_pixel(img, index.x, index.y, color);
+				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 	if (d_point.x > d_point.y)
 	{
 		cumul = d_point.x / 2;
@@ -61,7 +64,7 @@ void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, int color)
 				index.y += yinc; 
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(img, index.x, index.y, color);
+				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 		} 
 	}
 	else 
@@ -77,7 +80,8 @@ void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, int color)
 				index.x += xinc; 
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(img, index.x, index.y, color);
+				//img_put_pixel(img, index.x, index.y, color);
+				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 		}
 	}
 }
@@ -136,18 +140,18 @@ static void	calc_iso(t_map *map)
 	{
 		while (map->p[i].next == 1)
 		{
-			map->p[i].x = ((map->p[i].x + map->p[i].y) / 2) + 200;
-			map->p[i].y = ((map->p[i].y - map->p[i].x) / 2) + 200;
+			map->p[i].x = ((map->p[i].x - map->p[i].y) / 2) + (map->size_line * 2);
+			map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
 			i++;
 		}
-		map->p[i].x = ((map->p[i].x + map->p[i].y) / 2) + 200;
-		map->p[i].y = ((map->p[i].y - map->p[i].x) / 2) + 200;
+		map->p[i].x = ((map->p[i].x - map->p[i].y) / 2) + (map->size_line * 2);
+		map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
 		i = 0;
 		map = map->next;
 	}
 }
 
-static void decal(t_map *map, int value_up, int value_down)
+/*static void decal(t_map *map, int value_up, int value_down)
 {
 	int max_decal;
 	int i;
@@ -182,6 +186,7 @@ static void decal(t_map *map, int value_up, int value_down)
 		i = 0;
 	}
 }
+*/
 
 static void apply_pitch(t_map *map)
 {
@@ -192,10 +197,10 @@ static void apply_pitch(t_map *map)
 	{
 		while (map->p[i].next == 1)
 		{
-			map->p[i].y -= (map->p[i].pitch / 5);
+			map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
 			i++;
 		}
-		map->p[i].y -= (map->p[i].pitch);
+		map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
 		i = 0;
 		map = map->next;
 	}
@@ -214,17 +219,17 @@ static void trace_map(t_meta env, t_map *map)
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
 			{
-				draw_segment(env.img, &map->p[i], &map->p[i + 1], 0x000000FF);
-				draw_segment(env.img, &map->p[i], &map->next->p[i], 0x000000FF);
+				draw_segment(env.img, &map->p[i], &map->p[i + 1],map->p[i].pitch);
+				draw_segment(env.img, &map->p[i], &map->next->p[i],map->p[i].pitch);
 			}
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-				draw_segment(env.img, &map->next->p[i], &map->next->p[i + 1], 0x000000FF);
+				draw_segment(env.img, &map->next->p[i], &map->next->p[i + 1],map->p[i].pitch);
 			i++;
 		}
 		if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 				&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-			draw_segment(env.img, &map->p[i], &map->next->p[i], 0x000000FF);
+			draw_segment(env.img, &map->p[i], &map->next->p[i],map->p[i].pitch);
 		i = 0;
 		map = map->next;
 	}
@@ -280,33 +285,6 @@ static int calc_padding(t_map *map, int zoom)
 	return (padding);
 }
 
-void	create_map(t_meta env, t_map *map, int zoom, int i)
-{
-	int padding;
-
-	padding = calc_padding(map, zoom);
-	calc_iso(map);
-	apply_pitch(map);
-	decal(map, i, 0);
-	trace_map(env, map);
-	mlx_put_image_to_window (env.mlx, env.wnd, env.img.img_ptr, 0, 0);
-	ft_trace(NULL, "pass");
-}
-
-
-int		my_key_hook(int key_code, void *param)
-{
-	t_global *global;
-
-	global = param;
-	ft_nbrtrace("key_code", key_code);
-	if (key_code == 13)
-	{
-		create_map(global->env, global->map, 0, 100);
-	}
-	return (0);
-}
-
 void	erase_map(t_meta env)
 {
 	int i;
@@ -327,13 +305,82 @@ void	erase_map(t_meta env)
 	mlx_put_image_to_window (env.mlx, env.wnd, env.img.img_ptr, 0, 0);
 }
 
+void	create_map(t_meta env, t_map *map, int zoom, int i)
+{
+	int padding;
+	(void)zoom;
+	(void)padding;
+	(void)i;
+
+	padding = calc_padding(map, zoom);
+	calc_iso(map);
+	apply_pitch(map);
+	//decal(map, i, 0);
+	trace_map(env, map);
+	mlx_put_image_to_window(env.mlx, env.wnd, env.img.img_ptr, 0, 0);
+}
+
+void	change_pitch(t_map *map, int coef)
+{
+	int i;
+
+	i = 0;
+	while (map)
+	{
+		while (map->p[i].next == 1)
+		{
+			map->p[i].y += (map->p[i].pitch * coef) / map->size_line;
+			i++;
+		}
+			map->p[i].y += ((map->p[i].pitch * coef) / map->size_line);
+		//map->p[i].y += coef;
+		i = 0;
+		map = map->next;
+	}
+}
+
+void	create_map2(t_meta env, t_map *map, int zoom, int i)
+{
+	int padding;
+	(void)zoom;
+	(void)padding;
+	(void)i;
+
+	erase_map(env);
+	//padding = calc_padding(map, zoom);
+	//calc_iso(map);
+	//apply_pitch(map);
+	change_pitch(map, 10);
+	//decal(map, 0, 0);
+	trace_map(env, map);
+	mlx_put_image_to_window(env.mlx, env.wnd, env.img.img_ptr, 0, 0);
+	ft_trace(NULL, "pass");
+}
+
+
+int		my_key_hook(int key_code, t_global *global)
+{
+	ft_nbrtrace("key_code", key_code);
+	if (key_code == 13)
+	{
+		create_map2(global->env, global->map, 1, 1);
+	}
+	else if (key_code == 53)
+		exit(0);
+	return (0);
+}
+
+
+
 int		main(int argc, char **argv)
 {
 	t_global global;
 	t_meta	*env;
 	int		fd;
 	//t_map	*map;
-	int zoom = 5;
+	//int zoom = 5;
+	t_coord a;
+	t_coord b;
 
 	env = &global.env;
 
@@ -347,8 +394,18 @@ int		main(int argc, char **argv)
 	env->img.img_addr = mlx_get_data_addr(env->img.img_ptr, &(env->img.bits_per_pixel), &(env->img.size_line), &(env->img.endian));
 	printf("bits_per_pixel : %d / size_line : %d / endian : %d\n", env->img.bits_per_pixel, env->img.size_line, env->img.endian);
 
-	create_map(global.env, global.map, zoom, 0);
-	erase_map(global.env);
+	a.x = 100;
+	a.y = 100;
+
+	b.x = 300;
+	b.y = 350;
+	ft_nbrtrace("rouge", 0x00FF0000);
+	ft_nbrtrace("bleu", 0x000000FF);
+	
+	create_map(global.env, global.map, 1, 0);
+	ft_nbrtrace("bleu", 0x000000FF);
+
+
 	mlx_key_hook(env->wnd, &my_key_hook, &global);
 	//mlx_expose_hook(env->wnd, )
 	mlx_loop(env->mlx);

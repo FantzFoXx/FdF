@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 06:43:46 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/06 08:12:40 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/07 11:31:25 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # define WIDTH 1920
 # define HEIGHT 1080
 # define ABSOL(x) ((x) < 0 ? - (x) : (x))
+# define RGB(r, g, b)(256 * 256 * (int)(r) + 256 * (int)(g) + (int)(b))
 
 #include "t_map.h"
 
