@@ -29,7 +29,7 @@ static void		img_put_pixel(t_img_prop img, int x, int y, int color)
 	img.img_addr[final + 3] = col[3];
 }
 
-void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, double pitch)
+void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch)
 {
 	t_coord d_point;
 	t_coord index;
@@ -40,17 +40,17 @@ void	draw_segment(t_img_prop img, t_coord *point_a, t_coord *point_b, double pit
 
 
 
-	index.x = point_a->x;
-	index.y = point_a->y;
-	d_point.x = point_b->x - point_a->x;
-	d_point.y = point_b->y - point_a->y;
+	index.x = point_a.x;
+	index.y = point_a.y;
+	d_point.x = point_b.x - point_a.x;
+	d_point.y = point_b.y - point_a.y;
 	xinc = ( d_point.x > 0 ) ? 1 : -1;
 	yinc = ( d_point.y > 0 ) ? 1 : -1;
 	d_point.x = ABSOL(d_point.x);
 	d_point.y = ABSOL(d_point.y);
 	if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
 		//img_put_pixel(img, index.x, index.y, color);
-				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+		img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 	if (d_point.x > d_point.y)
 	{
 		cumul = d_point.x / 2;
@@ -140,76 +140,73 @@ static void	calc_iso(t_map *map)
 	{
 		while (map->p[i].next == 1)
 		{
-			map->p[i].x = ((map->p[i].x - map->p[i].y) / 2) + (map->size_line * 2);
+			map->p[i].x = ((map->p[i].x - map->p[i].y) / 2);
 			map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
 			i++;
 		}
-		map->p[i].x = ((map->p[i].x - map->p[i].y) / 2) + (map->size_line * 2);
+		map->p[i].x = ((map->p[i].x - map->p[i].y) / 2);
 		map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
 		i = 0;
 		map = map->next;
 	}
 }
 
-/*static void decal(t_map *map, int value_up, int value_down)
+static void decal(t_map *map, int value_up, int value_down)
 {
-	int max_decal;
 	int i;
 	t_map *index;
 
 	i = 0;
 	index = map;
-	while (map)
-	{
-		while (map->p[i].next == 1)
-		{
-			if (map->p[i].y < max_decal)
-				max_decal = map->p[i].y;
-			i++;
-		}
-		i = 0;
-		map = map->next;
-	}
-	max_decal = ABSOL(max_decal);
-	i = 0;
+	ft_nbrtrace("value_up", value_up);
 	while (index)
 	{
 		while (index->p[i].next == 1)
 		{
-			index->p[i].y += max_decal + value_up;
+			index->p[i].y += value_up;
 			index->p[i].x += value_down;
 			i++;
 		}
-		index->p[i].y += max_decal + value_up;
+		index->p[i].y += value_up;
 		index->p[i].x += value_down;
 		index = index->next;
 		i = 0;
 	}
 }
-*/
 
-static void apply_pitch(t_map *map)
+/*
+   static void apply_pitch(t_map *map)
+   {
+   int i;
+
+   i = 0;
+   while (map)
+   {
+   while (map->p[i].next == 1)
+   {
+   map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
+   i++;
+   }
+   map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
+   i = 0;
+   map = map->next;
+   }
+
+   }
+   */
+static t_coord apply_pitch(t_coord p, int coef)
 {
-	int i;
+	t_coord pitched;
 
-	i = 0;
-	while (map)
-	{
-		while (map->p[i].next == 1)
-		{
-			map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
-			i++;
-		}
-		map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
-		i = 0;
-		map = map->next;
-	}
-
+	pitched.x = p.x;
+	pitched.y = p.y - (p.pitch * coef);
+	return (pitched);
 }
 
-static void trace_map(t_meta env, t_map *map)
+static void trace_map(t_meta env, t_map *map, int coef, t_coord margin)
 {
 	int i;
+	(void)margin;
 
 	i = 0;
 	while (map->next)
@@ -219,17 +216,17 @@ static void trace_map(t_meta env, t_map *map)
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
 			{
-				draw_segment(env.img, &map->p[i], &map->p[i + 1],map->p[i].pitch);
-				draw_segment(env.img, &map->p[i], &map->next->p[i],map->p[i].pitch);
+				draw_segment(env.img, apply_pitch(map->p[i], coef), apply_pitch(map->p[i + 1], coef), map->p[i].pitch);
+				draw_segment(env.img, apply_pitch(map->p[i], coef), apply_pitch(map->next->p[i], coef), map->p[i].pitch);
 			}
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-				draw_segment(env.img, &map->next->p[i], &map->next->p[i + 1],map->p[i].pitch);
+				draw_segment(env.img, apply_pitch(map->next->p[i], coef), apply_pitch(map->next->p[i + 1], coef), map->p[i].pitch);
 			i++;
 		}
 		if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 				&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-			draw_segment(env.img, &map->p[i], &map->next->p[i],map->p[i].pitch);
+			draw_segment(env.img, apply_pitch(map->p[i], coef), apply_pitch(map->next->p[i], coef),map->p[i].pitch);
 		i = 0;
 		map = map->next;
 	}
@@ -268,6 +265,8 @@ static int calc_padding(t_map *map, int zoom)
 	while (((padding)* lines) < HEIGHT && ((padding) * biggest_line) < WIDTH)
 		padding++;
 	padding += zoom;
+	//padding -= zoom;
+	padding /= 1.1;
 	i = 0;
 	while (index)
 	{
@@ -284,7 +283,6 @@ static int calc_padding(t_map *map, int zoom)
 	}
 	return (padding);
 }
-
 void	erase_map(t_meta env)
 {
 	int i;
@@ -305,6 +303,83 @@ void	erase_map(t_meta env)
 	mlx_put_image_to_window (env.mlx, env.wnd, env.img.img_ptr, 0, 0);
 }
 
+int dec_padding(t_global *global, int zoom)
+{
+	int lines;
+	int padding;
+	t_map *index;
+	int i;
+
+	lines = 0;
+	index = global->map;
+	padding = 1;
+	//zoom /= 1.1;
+	erase_map(global->env);
+	i = 0;
+	while (index)
+	{
+		while (index->p[i].next)
+		{
+			index->p[i].x /= zoom;
+			index->p[i].y /= zoom;
+			i++;
+		}
+		index->p[i].x /= zoom;
+		index->p[i].y /= zoom;
+		i = 0;
+		index = index->next;
+	}
+	trace_map(global->env, global->map, i, global->map->margin);
+	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
+	return (padding);
+}
+
+int inc_padding(t_global *global, int zoom)
+{
+	int lines;
+	int padding;
+	t_map *index;
+	int i;
+
+	lines = 0;
+	index = global->map;
+	padding = 1;
+/*	biggest_line = 0;
+	while (map)
+	{
+		if (biggest_line < map->size_line)
+			biggest_line = map->size_line;
+		map = map->next;
+		lines++;
+	}
+	while (((padding)* lines) < HEIGHT && ((padding) * biggest_line) < WIDTH)
+		padding++;
+	padding += zoom;
+	//padding -= zoom;
+	*/
+	//zoom /= 1.1;
+	erase_map(global->env);
+	i = 0;
+	while (index)
+	{
+		while (index->p[i].next)
+		{
+			index->p[i].x *= zoom;
+			index->p[i].y *= zoom;
+			i++;
+		}
+		index->p[i].x *= zoom;
+		index->p[i].y *= zoom;
+		i = 0;
+		index = index->next;
+	}
+	trace_map(global->env, global->map, i, global->map->margin);
+	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
+	return (padding);
+}
+
+
+
 void	create_map(t_meta env, t_map *map, int zoom, int i)
 {
 	int padding;
@@ -314,9 +389,9 @@ void	create_map(t_meta env, t_map *map, int zoom, int i)
 
 	padding = calc_padding(map, zoom);
 	calc_iso(map);
-	apply_pitch(map);
-	//decal(map, i, 0);
-	trace_map(env, map);
+	//apply_pitch(map, 0);
+	decal(map, (ABSOL(map->p[0].x) * 2), 0);
+	trace_map(env, map, i, map->margin);
 	mlx_put_image_to_window(env.mlx, env.wnd, env.img.img_ptr, 0, 0);
 }
 
@@ -332,39 +407,74 @@ void	change_pitch(t_map *map, int coef)
 			map->p[i].y += (map->p[i].pitch * coef) / map->size_line;
 			i++;
 		}
-			map->p[i].y += ((map->p[i].pitch * coef) / map->size_line);
+		map->p[i].y += ((map->p[i].pitch * coef) / map->size_line);
 		//map->p[i].y += coef;
 		i = 0;
 		map = map->next;
 	}
 }
 
-void	create_map2(t_meta env, t_map *map, int zoom, int i)
+void	create_map2(t_global *global,  int zoom, int i, t_coord margin)
 {
-	int padding;
-	(void)zoom;
-	(void)padding;
-	(void)i;
+	static int zoom_maj = 0;
+	static int pitch_maj = 0;
 
-	erase_map(env);
-	//padding = calc_padding(map, zoom);
+	zoom_maj += zoom;
+	pitch_maj += i;
+
+	erase_map(global->env);
+	//change_padding(global, zoom);
 	//calc_iso(map);
 	//apply_pitch(map);
-	change_pitch(map, 10);
-	//decal(map, 0, 0);
-	trace_map(env, map);
-	mlx_put_image_to_window(env.mlx, env.wnd, env.img.img_ptr, 0, 0);
+	//change_pitch(map, 10);
+	decal(global->map, margin.y, margin.x);
+	trace_map(global->env, global->map, pitch_maj, margin);
+	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
 	ft_trace(NULL, "pass");
 }
 
 
 int		my_key_hook(int key_code, t_global *global)
 {
+	global->map->margin.x = 0;
+	global->map->margin.y = 0;
 	ft_nbrtrace("key_code", key_code);
-	if (key_code == 13)
+	if (key_code == 78)
+		create_map2(global, 0, -1, global->map->margin);
+	else if (key_code == 69)
+		create_map2(global, 0, 1, global->map->margin);
+	else if (key_code == 13)
 	{
-		create_map2(global->env, global->map, 1, 1);
+		global->map->margin.y = -7;
+		create_map2(global, 0, 0, global->map->margin);
 	}
+	else if (key_code == 1)
+	{
+		global->map->margin.y = 7;
+		create_map2(global, 0, 0, global->map->margin);
+	}
+	else if (key_code == 0)
+	{
+		global->map->margin.x = -7;
+		create_map2(global, 0, 0, global->map->margin);
+	}
+	else if (key_code == 2)
+	{
+		global->map->margin.x = 7;
+		create_map2(global, 0, 0, global->map->margin);
+	}
+	
+	else if (key_code == 126)
+	{
+		//create_map2(global, 2, 0, global->map->margin);
+		inc_padding(global, 2);
+	}
+	else if (key_code == 125)
+	{
+		dec_padding(global, 2);
+		//create_map2(global, -1, 0, global->map->margin);
+	}
+	
 	else if (key_code == 53)
 		exit(0);
 	return (0);
@@ -379,9 +489,6 @@ int		main(int argc, char **argv)
 	int		fd;
 	//t_map	*map;
 	//int zoom = 5;
-	t_coord a;
-	t_coord b;
-
 	env = &global.env;
 
 
@@ -394,19 +501,17 @@ int		main(int argc, char **argv)
 	env->img.img_addr = mlx_get_data_addr(env->img.img_ptr, &(env->img.bits_per_pixel), &(env->img.size_line), &(env->img.endian));
 	printf("bits_per_pixel : %d / size_line : %d / endian : %d\n", env->img.bits_per_pixel, env->img.size_line, env->img.endian);
 
-	a.x = 100;
-	a.y = 100;
+	global.map->margin.x = 100;
+	global.map->margin.y = 100;
 
-	b.x = 300;
-	b.y = 350;
 	ft_nbrtrace("rouge", 0x00FF0000);
 	ft_nbrtrace("bleu", 0x000000FF);
-	
-	create_map(global.env, global.map, 1, 0);
+
+	create_map(global.env, global.map, 3, 0);
 	ft_nbrtrace("bleu", 0x000000FF);
 
 
-	mlx_key_hook(env->wnd, &my_key_hook, &global);
+	mlx_hook(env->wnd, 2, (1L << 0) , &my_key_hook, &global);
 	//mlx_expose_hook(env->wnd, )
 	mlx_loop(env->mlx);
 	return (0);

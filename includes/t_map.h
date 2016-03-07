@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:21:48 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/07 11:08:19 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/07 20:03:35 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ typedef struct	s_map
 	t_coord			*p;
 	int				size_line;
 	int				nb_line;
+	t_coord			margin;
 	struct	s_map	*next;
 }				t_map;
 
