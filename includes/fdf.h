@@ -17,19 +17,7 @@
 # define HEIGHT 1080
 # define ABSOL(x) ((x) < 0 ? - (x) : (x))
 
-typedef struct	s_coord
-{
-	int				x;
-	int				y;
-	int				pitch;
-	int				next;
-}				t_coord;
-
-typedef struct	s_pitch_map
-{
-	char				**line;
-	struct	s_pitch_map *next;
-}				t_pitch_map;
+#include "t_map.h"
 
 typedef struct	s_img_prop
 {
@@ -46,5 +34,11 @@ typedef struct	s_meta
 	void		*wnd;
 	t_img_prop	img;
 }				t_meta;
+
+typedef struct	s_global
+{
+	t_meta	env;
+	t_map	*map;
+}				t_global;
 
 #endif

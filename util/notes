@@ -5,3 +5,14 @@
 	- le zoom de base
 	- la taille du pitch
 
+key_codes :
+
+UP : 126
+LEFT : 123
+DOWN : 125
+RIGHT : 124
+
+W : 13
+A : 0
+S : 1
+D : 2

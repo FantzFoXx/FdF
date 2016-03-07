@@ -13,12 +13,19 @@
 #ifndef T_MAP_H
 # define T_MAP_H
 
-#include "fdf.h"
+typedef struct	s_coord
+{
+	int				x;
+	int				y;
+	int				pitch;
+	int				next;
+}				t_coord;
+
 
 typedef struct	s_map
 {
-	//char			**line;
 	t_coord			*p;
+	int				size_line;
 	struct	s_map	*next;
 }				t_map;
 

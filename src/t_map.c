@@ -57,28 +57,25 @@ t_map		*t_map_new(char *line, size_t line_nb)
 	line_size = ft_wordcount(line, ' ');
 	spl = ft_strsplit(line, ' ');
 	new = (t_map *)malloc(sizeof(t_map));
+	new->size_line = line_size;
 	i = -1;
-	padding = 50;
+	padding = 10;
 	if (new)
 	{
 		new->p = (t_coord *)malloc(sizeof(t_coord) * line_size + 1);
 		i = -1;
 		while (spl[++i])
 		{
-			ft_trace(NULL, "pass");
-			new->p[i].x = i * padding;
-			new->p[i].y = line_nb * padding;
+			//ft_trace(NULL, "pass");
+			new->p[i].x = i/* * padding*/;
+			new->p[i].y = line_nb /** padding*/;
 			new->p[i].pitch = ft_atoi(spl[i]);
+			//ft_nbrtrace("rea atoi", new->p[i].pitch);
 			if (spl[i + 1] != NULL)
-			{
-				
-			ft_trace(NULL, "has a next");
-				new->p->next = 1;
-			}
+				new->p[i].next = 1;
 			else
-				new->p->next = 1;
+				new->p[i].next = 0;
 		}
-			ft_trace(NULL, "");
 		new->next = NULL;
 	}
 	return (new);
