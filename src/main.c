@@ -40,6 +40,7 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 
 
 
+	//ft_trace(NULL, "begin pass");
 	index.x = point_a.x;
 	index.y = point_a.y;
 	d_point.x = point_b.x - point_a.x;
@@ -72,6 +73,7 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 		cumul = d_point.y / 2;
 		for (i = 1 ; i <= d_point.y ; i++) 
 		{
+			//ft_nbrtrace("for", d_point.y);
 			index.y += yinc;
 			cumul += d_point.x;
 			if (cumul >= d_point.y) 
@@ -84,30 +86,35 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 		}
 	}
+	//ft_trace(NULL, "end pass");
 }
 
-static t_map	*init_map(int fd)
+static t_map	*init_map(int fd, char *filename)
 {
 	char *line;
 	t_map *map;
 	t_map *index;
 	size_t	line_nb;
+	int		gnl_ret;
 
 	map = NULL;
 	line_nb = 0;
 	index = map;
-	while (get_next_line(fd, &line) > 0)
+	gnl_ret = 0;
+	while ((gnl_ret = get_next_line(fd, &line)) && gnl_ret > 0)
 	{
 		t_map_push(&map, t_map_new(line, line_nb));
 		free(line);
 		line_nb++;
 	}
-
+	if (gnl_ret == -1 || line_nb == 0)
+		catch_errors(3, filename);
 	return (map);
 }
 /*
-   static void	calc_iso(t_map *map)
+   static void	calc_iso(t_map *map, t_global *global)
    {
+   (void)global;
    int i;
 
    i = 0;
@@ -126,6 +133,7 @@ static t_map	*init_map(int fd)
    }
    }
    */
+
 int		get_iso_decal(t_global *global)
 {
 	t_map *map;
@@ -143,8 +151,6 @@ static void decal(t_map *map, int value_up, int value_down)
 
 	i = 0;
 	index = map;
-	ft_nbrtrace("value_up", value_up);
-	
 	while (index)
 	{
 		while (index->p[i].next == 1)
@@ -187,41 +193,12 @@ static void	calc_iso(t_map *map, t_global *global)
 	decal(bak, 0, get_iso_decal(global));
 }
 
-/*
-   static void apply_pitch(t_map *map)
-   {
-   int i;
-
-   i = 0;
-   while (map)
-   {
-   while (map->p[i].next == 1)
-   {
-   map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
-   i++;
-   }
-   map->p[i].y -= ((map->p[i].pitch * (map->size_line / 3)) / 2);
-   i = 0;
-   map = map->next;
-   }
-
-   }
-   */
 static t_coord apply_pitch(t_coord p, int coef, t_global *global)
 {
 	t_coord pitched;
 
 	pitched.x = p.x;
 	pitched.y = p.y - ((p.pitch * ((coef * (global->map->padding)))) * 0.01);
-	/*
-	if (p.pitch >= 0)
-	{	
-		pitched.y = p.y - ((p.pitch * ((coef * (global->map->padding)))) * 0.01);
-	}
-	if (p.pitch < 0)
-	{	
-		pitched.y = p.y - ((p.pitch * ((coef * (global->map->padding)))) * 0.01);
-	}*/
 	return (pitched);
 }
 
@@ -288,7 +265,7 @@ static int calc_padding(t_map *map, int zoom)
 		padding++;
 	padding += zoom;
 	//padding -= zoom;
-	padding /= 1.1;
+	padding /= 2;
 	i = 0;
 	while (index)
 	{
@@ -346,7 +323,7 @@ double dec_padding(t_global *global, int zoom)
 			i++;
 		}
 		index->p[i].x /= zoom;
-			index->p[i].y /= zoom;
+		index->p[i].y /= zoom;
 		i = 0;
 		index = index->next;
 	}
@@ -375,7 +352,7 @@ double inc_padding(t_global *global, int zoom)
 			i++;
 		}
 		index->p[i].x *= zoom;
-			index->p[i].y *= zoom;
+		index->p[i].y *= zoom;
 		i = 0;
 		index = index->next;
 	}
@@ -461,7 +438,7 @@ int		my_key_hook(int key_code, t_global *global)
 		global->map->margin.x = 10;
 		create_map2(global, 0, 0, global->map->margin);
 	}
-	
+
 	else if (key_code == 69)
 	{
 		global->map->padding = inc_padding(global, 2);
@@ -472,7 +449,7 @@ int		my_key_hook(int key_code, t_global *global)
 		global->map->padding = dec_padding(global, 2);
 		create_map2(global, 0, 0, global->map->margin);
 	}
-	
+
 	else if (key_code == 53)
 		exit(0);
 	return (0);
@@ -489,7 +466,7 @@ int		main(int argc, char **argv)
 
 
 	fd = open_file(argc, argv);
-	global.map = init_map(fd);
+	global.map = init_map(fd, argv[1]);
 	close(fd);
 	env->mlx = mlx_init();
 	env->wnd = mlx_new_window(env->mlx, WIDTH, HEIGHT, "Fdf");
@@ -497,8 +474,8 @@ int		main(int argc, char **argv)
 	env->img.img_addr = mlx_get_data_addr(env->img.img_ptr, &(env->img.bits_per_pixel), &(env->img.size_line), &(env->img.endian));
 	printf("bits_per_pixel : %d / size_line : %d / endian : %d\n", env->img.bits_per_pixel, env->img.size_line, env->img.endian);
 
-	global.map->margin.x = 1000;
-	global.map->margin.y = 1000;
+	global.map->margin.x = 0;
+	global.map->margin.y = 0;
 	global.map->pitch_maj = 2;
 	global.map->zoom_maj = 2;
 
