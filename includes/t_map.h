@@ -15,8 +15,8 @@
 
 typedef struct	s_coord
 {
-	int				x;
-	int				y;
+	double				x;
+	double				y;
 	int				pitch;
 	int				next;
 }				t_coord;
@@ -28,6 +28,9 @@ typedef struct	s_map
 	int				size_line;
 	int				nb_line;
 	t_coord			margin;
+	double			padding;
+	int				pitch_maj;
+	int				zoom_maj;
 	struct	s_map	*next;
 }				t_map;
 

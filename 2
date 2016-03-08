@@ -336,6 +336,7 @@ double dec_padding(t_global *global, int zoom)
 	index = global->map;
 	padding = global->map->padding / zoom;
 	//zoom /= 1.1;
+	//erase_map(global->env);
 	i = 0;
 	while (index)
 	{
@@ -350,7 +351,7 @@ double dec_padding(t_global *global, int zoom)
 		i = 0;
 		index = index->next;
 	}
-	decal(global->map, (HEIGHT / 4), (WIDTH / 4));
+	decal(global->map, (HEIGHT / 2), (WIDTH / 2));
 	return (padding);
 }
 
@@ -364,6 +365,8 @@ double inc_padding(t_global *global, int zoom)
 	lines = 0;
 	index = global->map;
 	padding = global->map->padding * zoom;
+	//global->map->margin.x *= zoom;
+	//global->map->margin.y *= zoom;
 	//zoom /= 1.1;
 	i = 0;
 	while (index)
@@ -379,6 +382,9 @@ double inc_padding(t_global *global, int zoom)
 		i = 0;
 		index = index->next;
 	}
+	//decal(global->map, -100, -100);
+	//ft_nbrtrace("margin.y neg", (global->map->margin.y * padding) * -1);
+	//ft_nbrtrace("margin.x neg", (global->map->margin.x * padding) * -1);
 	decal(global->map, -(HEIGHT / 2), -(WIDTH / 2));
 	return (padding);
 }
