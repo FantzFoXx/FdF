@@ -10,6 +10,7 @@
 #include "get_next_line.h"
 #include "catch_errors.h"
 #include "t_map.h"
+#include <math.h>
 
 static void		img_put_pixel(t_img_prop img, int x, int y, int color)
 {
@@ -95,15 +96,17 @@ static t_map	*init_map(int fd, char *filename)
 	t_map *map;
 	t_map *index;
 	size_t	line_nb;
+	size_t		size_line;
 	int		gnl_ret;
 
 	map = NULL;
 	line_nb = 0;
 	index = map;
 	gnl_ret = 0;
+	size_line = 0;
 	while ((gnl_ret = get_next_line(fd, &line)) && gnl_ret > 0)
 	{
-		t_map_push(&map, t_map_new(line, line_nb));
+		t_map_push(&map, t_map_new(line, line_nb, &size_line));
 		free(line);
 		line_nb++;
 	}
@@ -166,7 +169,7 @@ static void decal(t_map *map, int value_up, int value_down)
 	}
 }
 
-static void	calc_iso(t_map *map, t_global *global)
+void	calc_iso(t_map *map, t_global *global)
 {
 	t_map *bak;
 	int i;
@@ -261,11 +264,10 @@ static int calc_padding(t_map *map, int zoom)
 		map = map->next;
 		lines++;
 	}
-	while (((padding)* lines) < HEIGHT && ((padding) * biggest_line) < WIDTH)
-		padding++;
-	padding += zoom;
-	//padding -= zoom;
-	padding /= 2;
+	padding = HEIGHT / lines;
+	if (!padding)
+		padding = 1;
+	padding *= zoom;
 	i = 0;
 	while (index)
 	{
@@ -280,7 +282,7 @@ static int calc_padding(t_map *map, int zoom)
 		i = 0;
 		index = index->next;
 	}
-	return (padding);
+	return (ABSOL(padding));
 }
 void	erase_map(t_meta env)
 {
@@ -365,14 +367,24 @@ double inc_padding(t_global *global, int zoom)
 void	create_map(t_global *global)
 {
 
+	ft_trace(">>> Calculating padding" ,"...");
 	global->map->padding = calc_padding(global->map, global->map->zoom_maj);
+	ft_putendl("Done.");
+	ft_trace(">>> Calculating ISO" ,"...");
 	calc_iso(global->map, global);
+	ft_putendl("Done.");
 	//apply_pitch(map, 0);
 	global->map->margin.y = 20;
 	global->map->margin.x = 20;
+	ft_trace(">>> Correcting ISO placement" ,"...");
 	decal(global->map, global->map->margin.y, global->map->margin.x);
+	ft_putendl("Done.");
+	ft_trace(">>> Tracing map" ,"...");
 	trace_map(global->env, global->map, global->map->pitch_maj, global->map->margin, global);
+	ft_putendl("Done.");
+	ft_trace(">>> Displaying map" ,"...");
 	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
+	ft_putendl("Done.");
 }
 
 void	change_pitch(t_global *global, int coef)
@@ -394,60 +406,72 @@ void	change_pitch(t_global *global, int coef)
 	}
 }
 
-void	create_map2(t_global *global,  int zoom, int i, t_coord margin)
+void	reload_map(t_global *global,  int zoom, int i, t_coord margin)
 {
+	(void)margin;
 	global->map->zoom_maj += zoom;
 	global->map->pitch_maj += i;
 
-	erase_map(global->env);
 	//calc_iso(global->map);
 	//change_pitch(global, 1);
-	decal(global->map, margin.y, margin.x);
+	//decal(global->map, margin.y, margin.x);
+	ft_trace(">>> Erasing old map" ,"...");
+	erase_map(global->env);
+	ft_putendl("Done.");
+	ft_trace(">>> Tracing map" ,"...");
 	trace_map(global->env, global->map, global->map->pitch_maj, margin, global);
+	ft_putendl("Done.");
+	ft_trace(">>> Displaying map" ,"...");
 	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
-	ft_nbrtrace("padding", global->map->padding);
+	ft_putendl("Done.");
+	ft_nbrtrace("Padding value", global->map->padding);
 }
 
 
 int		my_key_hook(int key_code, t_global *global)
 {
+	ft_nbrtrace("key_code", key_code);
+	ft_trace(">>> Recalculating data" ,"...");
 	global->map->margin.x = 0;
 	global->map->margin.y = 0;
-	ft_nbrtrace("key_code", key_code);
 	if (key_code == 125)
-		create_map2(global, 0, -1, global->map->margin);
+		reload_map(global, 0, -1, global->map->margin);
 	else if (key_code == 126)
-		create_map2(global, 0, 1, global->map->margin);
+		reload_map(global, 0, 1, global->map->margin);
 	else if (key_code == 13)
 	{
 		global->map->margin.y = -10;
-		create_map2(global, 0, 0, global->map->margin);
+		decal(global->map, global->map->margin.y, global->map->margin.x);
+		reload_map(global, 0, 0, global->map->margin);
 	}
 	else if (key_code == 1)
 	{
 		global->map->margin.y = 10;
-		create_map2(global, 0, 0, global->map->margin);
+		decal(global->map, global->map->margin.y, global->map->margin.x);
+		reload_map(global, 0, 0, global->map->margin);
 	}
 	else if (key_code == 0)
 	{
 		global->map->margin.x = -10;
-		create_map2(global, 0, 0, global->map->margin);
+		decal(global->map, global->map->margin.y, global->map->margin.x);
+		reload_map(global, 0, 0, global->map->margin);
 	}
 	else if (key_code == 2)
 	{
 		global->map->margin.x = 10;
-		create_map2(global, 0, 0, global->map->margin);
+		decal(global->map, global->map->margin.y, global->map->margin.x);
+		reload_map(global, 0, 0, global->map->margin);
 	}
 
 	else if (key_code == 69)
 	{
 		global->map->padding = inc_padding(global, 2);
-		create_map2(global, 0, 0, global->map->margin);
+		reload_map(global, 0, 0, global->map->margin);
 	}
 	else if (key_code == 78)
 	{
 		global->map->padding = dec_padding(global, 2);
-		create_map2(global, 0, 0, global->map->margin);
+		reload_map(global, 0, 0, global->map->margin);
 	}
 
 	else if (key_code == 53)
@@ -455,7 +479,23 @@ int		my_key_hook(int key_code, t_global *global)
 	return (0);
 }
 
-
+void	get_user_params(int ac, char **av, t_global *global)
+{
+	if (ac == 4)
+	{
+		global->map->pitch_maj = ft_atoi(av[2]);
+		global->map->zoom_maj = ft_atoi(av[3]);
+		ft_nbrtrace("pitch_maj", global->map->pitch_maj);
+		ft_nbrtrace("zoom_maj", global->map->zoom_maj);
+		if (global->map->zoom_maj == 0)
+			global->map->zoom_maj = 1;
+	}
+	else
+	{
+		global->map->pitch_maj = 2;
+		global->map->zoom_maj = 1;
+	}
+}
 
 int		main(int argc, char **argv)
 {
@@ -464,22 +504,32 @@ int		main(int argc, char **argv)
 	int		fd;
 	env = &global.env;
 
-
+	ft_trace(">>> Parsing map" ,"...");
 	fd = open_file(argc, argv);
 	global.map = init_map(fd, argv[1]);
 	close(fd);
+	ft_putendl("Done.");
+	ft_trace(">>> Init mlx" ,"...");
 	env->mlx = mlx_init();
+	ft_putendl("Done.");
+	ft_trace(">>> Loading window" ,"...");
 	env->wnd = mlx_new_window(env->mlx, WIDTH, HEIGHT, "Fdf");
+	ft_putendl("Done.");
+	ft_trace(">>> Loading memory image" ,"...");
 	env->img.img_ptr = mlx_new_image(env->mlx, WIDTH, HEIGHT);	
 	env->img.img_addr = mlx_get_data_addr(env->img.img_ptr, &(env->img.bits_per_pixel), &(env->img.size_line), &(env->img.endian));
 	printf("bits_per_pixel : %d / size_line : %d / endian : %d\n", env->img.bits_per_pixel, env->img.size_line, env->img.endian);
 
-	global.map->margin.x = 0;
-	global.map->margin.y = 0;
-	global.map->pitch_maj = 2;
-	global.map->zoom_maj = 2;
 
+	ft_putendl("Done.");
+	ft_trace(">>> Charging user preferences" ,"...");
+	get_user_params(argc, argv, &global);
+	//global.map->pitch_maj = 2;
+	//global.map->zoom_maj = 2;
+
+	ft_trace(">>> In create_map" ,"...");
 	create_map(&global);
+	ft_putendl("Evrything done.");
 
 	mlx_hook(env->wnd, 2, (1L << 0) , &my_key_hook, &global);
 	mlx_loop(env->mlx);

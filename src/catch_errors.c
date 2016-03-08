@@ -36,7 +36,7 @@ int		catch_errors(int err_code, char *err_msg)
 		}
 	}
 	else if (err_code == 2)
-		ft_putendl("Found wrong line length. Exiting.");
+		ft_putendl("Wrong file data");
 	else if (err_code == 3)
 	{
 			ft_putstr(err_msg);

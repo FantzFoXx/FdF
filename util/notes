@@ -21,8 +21,6 @@ D : 2
 
 - leaks
 - norme
-- gerer options zoom et pitch de base
-- revoir le zoom de base
 - RETIRER LA BOUCLE FOR DANS LA FONCTION DE TRACER DE SEGMENT !!!!!!!!!!!!
 
 options possibles :

@@ -13,7 +13,7 @@
 #ifndef FDF_H
 # define FDF_H
 
-# define WIDTH 1920
+# define WIDTH 1720
 # define HEIGHT 1080
 # define ABSOL(x) ((x) < 0 ? - (x) : (x))
 # define RGB(r, g, b)(256 * 256 * (int)(r) + 256 * (int)(g) + (int)(b))

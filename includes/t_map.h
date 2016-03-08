@@ -34,7 +34,7 @@ typedef struct	s_map
 	struct	s_map	*next;
 }				t_map;
 
-t_map			*t_map_new(char *line, size_t line_nb);
+t_map			*t_map_new(char *line, size_t line_nb, size_t *size_line);
 void			t_map_push(t_map **first, t_map *new);
 
 #endif

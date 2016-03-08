@@ -16,7 +16,7 @@
 #include "fdf.h"
 #include "catch_errors.h"
 
-t_map		*t_map_new(char *line, size_t line_nb/*, int *line_size*/)
+t_map		*t_map_new(char *line, size_t line_nb, size_t *size_line)
 {
 	t_map	*new;
 	char	**spl;
@@ -25,9 +25,9 @@ t_map		*t_map_new(char *line, size_t line_nb/*, int *line_size*/)
 	int		padding;
 
 	line_size = ft_wordcount(line, ' ');
-	if (!line[0])
+	if (line_size < 1 || (line_size != *size_line && line_nb > 0))
 		catch_errors(2, NULL);
-	//if (size_line < 2)
+	*size_line = line_size;
 	spl = ft_strsplit(line, ' ');
 	new = (t_map *)malloc(sizeof(t_map));
 	new->size_line = line_size;
@@ -42,7 +42,6 @@ t_map		*t_map_new(char *line, size_t line_nb/*, int *line_size*/)
 				new->p[i].x = i/* * padding*/;
 				new->p[i].y = line_nb /** padding*/;
 				new->p[i].pitch = ft_atoi(spl[i]);
-				//ft_nbrtrace("value", ft_atoi(spl[i]));
 				if (spl[i + 1] != NULL)
 					new->p[i].next = 1;
 				else
