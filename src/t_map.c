@@ -6,17 +6,17 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:20:22 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/07 12:30:52 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/09 19:03:00 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "libft.h"
 #include "t_map.h"
-#include "fdf.h"
+//#include "fdf.h"
 #include "catch_errors.h"
 
-t_map		*t_map_new(char *line, size_t line_nb, size_t *size_line)
+t_map		*t_map_new(char *line, size_t line_nb, size_t *size_line, t_global *global)
 {
 	t_map	*new;
 	char	**spl;
@@ -42,6 +42,10 @@ t_map		*t_map_new(char *line, size_t line_nb, size_t *size_line)
 				new->p[i].x = i/* * padding*/;
 				new->p[i].y = line_nb /** padding*/;
 				new->p[i].pitch = ft_atoi(spl[i]);
+				if (new->p[i].pitch > 0 && new->p[i].pitch > global->high_pitch)
+					global->high_pitch = new->p[i].pitch;
+				else if (new->p[i].pitch <= 0 && new->p[i].pitch < global->high_pitch)
+					global->low_pitch = new->p[i].pitch;
 				if (spl[i + 1] != NULL)
 					new->p[i].next = 1;
 				else

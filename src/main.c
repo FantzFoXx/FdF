@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include "t_map.h"
 #include "fdf.h"
 #include "mlx.h"
 #include <math.h>
@@ -9,7 +10,6 @@
 #include "libft.h"
 #include "get_next_line.h"
 #include "catch_errors.h"
-#include "t_map.h"
 #include <math.h>
 
 static void		img_put_pixel(t_img_prop img, int x, int y, int color)
@@ -30,7 +30,33 @@ static void		img_put_pixel(t_img_prop img, int x, int y, int color)
 	img.img_addr[final + 3] = col[3];
 }
 
-void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch)
+int		calc_rgb(int r, int g, int b)
+{
+	int ret;
+
+	//ret = 0;
+	ret = b;
+	ret += g * 0x100;
+	ret += r * 0x10000;
+	return (ret);
+}
+
+int		pitch_color(int pitch, t_global *global)
+{
+	if (pitch >= ((global->high_pitch * 50) / 100))	
+		return (0x00FFFFFF);
+	else if (pitch >= ((global->high_pitch * 15) / 100))	
+		return (0x006C4500);
+	else if (pitch >= ((global->high_pitch * 10) / 100) || pitch > 0)	
+		return (0x0083AB00);
+	else if (/*pitch >= 0 &&*/ pitch == 0)	
+		return (0x00004FC6);
+	else if (pitch < 0)
+		return (0x00D0B15C);
+	return (0x00FFFFFF);
+}
+
+void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch, t_global *global)
 {
 	t_coord d_point;
 	t_coord index;
@@ -51,8 +77,9 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 	d_point.x = ABSOL(d_point.x);
 	d_point.y = ABSOL(d_point.y);
 	if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-		//img_put_pixel(img, index.x, index.y, color);
-		img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+		img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
+		//img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+		//img_put_pixel(img, index.x, index.y, calc_rgb((cos(pitch) + 1), (sin(pitch) + 1), (1 - cos(pitch))));
 	if (d_point.x > d_point.y)
 	{
 		cumul = d_point.x / 2;
@@ -66,7 +93,8 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 				index.y += yinc; 
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+				img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
+				//img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 		} 
 	}
 	else 
@@ -84,33 +112,34 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
 				//img_put_pixel(img, index.x, index.y, color);
-				img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+				img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
+				//img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
 		}
 	}
 	//ft_trace(NULL, "end pass");
 }
 
-static t_map	*init_map(int fd, char *filename)
+static t_map	*init_map(int fd, char *filename, t_global *global)
 {
 	char *line;
 	t_map *map;
 	t_map *index;
-	size_t	line_nb;
-	size_t		size_line;
 	int		gnl_ret;
 
 	map = NULL;
-	line_nb = 0;
 	index = map;
 	gnl_ret = 0;
-	size_line = 0;
+	global->map_col = 0;
+	global->map_lines = 0;
+	global->high_pitch = 0;
+	global->low_pitch = 0;
 	while ((gnl_ret = get_next_line(fd, &line)) && gnl_ret > 0)
 	{
-		t_map_push(&map, t_map_new(line, line_nb, &size_line));
+		t_map_push(&map, t_map_new(line, global->map_lines, &global->map_col, global));
 		free(line);
-		line_nb++;
+		global->map_lines += 1;
 	}
-	if (gnl_ret == -1 || line_nb == 0)
+	if (gnl_ret == -1 || global->map_lines == 0)
 		catch_errors(3, filename);
 	return (map);
 }
@@ -211,27 +240,39 @@ static void trace_map(t_meta env, t_map *map, int coef, t_coord margin, t_global
 	(void)margin;
 
 	i = 0;
-	while (map->next)
-	{
+	if (map && !map->next)
 		while (map->p[i].next == 1)
 		{
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
+				draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->p[i + 1], coef, global), map->p[i].pitch, global);
+			//if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
+			//		&& (map->p[i].x >= 0 || map->p[i].y >= 0))
+			//	draw_segment(env.img, apply_pitch(map->next->p[i], coef, global), apply_pitch(map->next->p[i + 1], coef, global), map->p[i].pitch);
+			i++;
+		}
+	else
+		while (map->next)
+		{
+			while (map->p[i].next == 1)
 			{
-				draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->p[i + 1], coef, global), map->p[i].pitch);
-				draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->next->p[i], coef, global), map->p[i].pitch);
+				if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
+						&& (map->p[i].x >= 0 || map->p[i].y >= 0))
+				{
+					draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->p[i + 1], coef, global), map->p[i].pitch, global);
+					draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->next->p[i], coef, global), map->p[i].pitch, global);
+				}
+				if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
+						&& (map->p[i].x >= 0 || map->p[i].y >= 0))
+					draw_segment(env.img, apply_pitch(map->next->p[i], coef, global), apply_pitch(map->next->p[i + 1], coef, global), map->p[i].pitch, global);
+				i++;
 			}
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-				draw_segment(env.img, apply_pitch(map->next->p[i], coef, global), apply_pitch(map->next->p[i + 1], coef, global), map->p[i].pitch);
-			i++;
+				draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->next->p[i], coef, global),map->p[i].pitch, global);
+			i = 0;
+			map = map->next;
 		}
-		if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
-				&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-			draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->next->p[i], coef, global),map->p[i].pitch);
-		i = 0;
-		map = map->next;
-	}
 }
 
 static int open_file(int ac, char **av)
@@ -506,7 +547,7 @@ int		main(int argc, char **argv)
 
 	ft_trace(">>> Parsing map" ,"...");
 	fd = open_file(argc, argv);
-	global.map = init_map(fd, argv[1]);
+	global.map = init_map(fd, argv[1], &global);
 	close(fd);
 	ft_putendl("Done.");
 	ft_trace(">>> Init mlx" ,"...");
@@ -530,6 +571,7 @@ int		main(int argc, char **argv)
 	ft_trace(">>> In create_map" ,"...");
 	create_map(&global);
 	ft_putendl("Evrything done.");
+
 
 	mlx_hook(env->wnd, 2, (1L << 0) , &my_key_hook, &global);
 	mlx_loop(env->mlx);

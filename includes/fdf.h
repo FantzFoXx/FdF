@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 06:43:46 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/07 11:31:25 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/09 17:58:19 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@
 # define ABSOL(x) ((x) < 0 ? - (x) : (x))
 # define RGB(r, g, b)(256 * 256 * (int)(r) + 256 * (int)(g) + (int)(b))
 
-#include "t_map.h"
+//#include "t_map.h"
+//#include "fdf.h"
 
 typedef struct	s_img_prop
 {
@@ -35,11 +36,4 @@ typedef struct	s_meta
 	void		*wnd;
 	t_img_prop	img;
 }				t_meta;
-
-typedef struct	s_global
-{
-	t_meta	env;
-	t_map	*map;
-}				t_global;
-
 #endif
