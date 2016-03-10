@@ -13,8 +13,8 @@
 #ifndef FDF_H
 # define FDF_H
 
-# define WIDTH 2560
-# define HEIGHT 1300
+# define WIDTH 1200
+# define HEIGHT 900
 # define ABSOL(x) ((x) < 0 ? - (x) : (x))
 # define RGB(r, g, b)(256 * 256 * (int)(r) + 256 * (int)(g) + (int)(b))
 
@@ -35,5 +35,6 @@ typedef struct	s_meta
 	void		*mlx;
 	void		*wnd;
 	t_img_prop	img;
+	char		*map_name;
 }				t_meta;
 #endif

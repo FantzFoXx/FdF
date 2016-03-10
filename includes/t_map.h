@@ -33,6 +33,7 @@ typedef struct	s_map
 	double			padding;
 	int				pitch_maj;
 	int				zoom_maj;
+	int				inc;
 	struct s_map	*next;
 }				t_map;
 

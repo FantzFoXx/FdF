@@ -75,7 +75,7 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 	d_point.y = ABSOL(floor(d_point.y));
 	if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
 		img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
-		//img_put_pixel(img, index.x, index.y, calc_rgb((cos(pitch) + 1), (sin(pitch) + 1), (1 - cos(pitch))));
+	//img_put_pixel(img, index.x, index.y, calc_rgb((cos(pitch) + 1), (sin(pitch) + 1), (1 - cos(pitch))));
 	if (d_point.x > d_point.y)
 	{
 		cumul = d_point.x / 2;
@@ -90,7 +90,7 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
 				//img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-		img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
+				img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
 		} 
 	}
 	else 
@@ -108,7 +108,7 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
 				//img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-		img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
+				img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
 		}
 	}
 	//ft_trace(NULL, "end pass");
@@ -136,6 +136,7 @@ static t_map	*init_map(int fd, char *filename, t_global *global)
 	}
 	if (gnl_ret == -1 || global->map_lines == 0)
 		catch_errors(3, filename);
+	global->env.map_name = filename;
 	return (map);
 }
 /*
@@ -337,7 +338,7 @@ void	erase_map(t_meta env)
 	mlx_put_image_to_window (env.mlx, env.wnd, env.img.img_ptr, 0, 0);
 }
 
-double dec_padding(t_global *global, int zoom)
+double dec_padding(t_global *global, int zoom, int x, int y)
 {
 	int lines;
 	double padding;
@@ -362,11 +363,14 @@ double dec_padding(t_global *global, int zoom)
 		i = 0;
 		index = index->next;
 	}
-	decal(global->map, (HEIGHT / 4), (WIDTH / 4));
+	if (x >= 0 && y >= 0)
+		decal(global->map, y / 2, x / 2);
+	else
+		decal(global->map, (HEIGHT / 4), (WIDTH / 4));
 	return (padding);
 }
 
-double inc_padding(t_global *global, int zoom)
+double inc_padding(t_global *global, int zoom, int x, int y)
 {
 	int lines;
 	double padding;
@@ -391,8 +395,40 @@ double inc_padding(t_global *global, int zoom)
 		i = 0;
 		index = index->next;
 	}
-	decal(global->map, -(HEIGHT / 2), -(WIDTH / 2));
+	if (x >= 0 && y >= 0)
+		decal(global->map, -y, -x);
+	else
+		decal(global->map, -(HEIGHT / 2), -(WIDTH / 2));
 	return (padding);
+}
+
+void	print_infos(t_global *global)
+{
+	char *info;
+	char *tmp;
+
+	info = ft_strjoin("Map    : ", global->env.map_name);
+	mlx_string_put(global->env.mlx, global->env.wnd, 20, 20, 0x00FFFFFF, info);
+	free(info);
+	tmp = ft_itoa(WIDTH);
+	info = ft_strjoin("Width  : ", tmp);
+	free(tmp);
+	mlx_string_put(global->env.mlx, global->env.wnd, 20, 40, 0x00FFFFFF, info);
+	free(info);
+	tmp = ft_itoa(HEIGHT);
+	info = ft_strjoin("Height : ", tmp);
+	free(tmp);
+	mlx_string_put(global->env.mlx, global->env.wnd, 20, 60, 0x00FFFFFF, info);
+	free(info);
+	tmp = ft_itoa((int)global->map->padding);
+	info = ft_strjoin("Zoom   : ", tmp);
+	free(tmp);
+	mlx_string_put(global->env.mlx, global->env.wnd, 20, 80, 0x00FFFFFF, info);
+	free(info);
+	tmp = ft_itoa((int)global->map->pitch_maj);
+	info = ft_strjoin("Pitch  : ", tmp);
+	free(tmp);
+	mlx_string_put(global->env.mlx, global->env.wnd, 20, 100, 0x00FFFFFF, info);
 }
 
 void	create_map(t_global *global)
@@ -416,6 +452,7 @@ void	create_map(t_global *global)
 	ft_trace(">>> Displaying map" ,"...");
 	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
 	ft_putendl("Done.");
+	print_infos(global);
 }
 
 void	change_pitch(t_global *global, int coef)
@@ -444,17 +481,21 @@ void	up_tilt_map(t_global *global)
 
 	index = global->map;
 	i = 0;
-	decal(global->map, -(index->p[global->map_lines / 2].y) * 0.5, 0);
-	while (index)
+	if (global->map->inc > 0)
 	{
-		while (index->p[i].next)
+		decal(global->map, -(index->p[global->map_lines / 2].y) * 0.5, 0);
+		while (index)
 		{
+			while (index->p[i].next)
+			{
+				index->p[i].y /= 0.5;
+				i++;
+			}
 			index->p[i].y /= 0.5;
-			i++;
+			i = 0;
+			index = index->next;
 		}
-		index->p[i].y /= 0.5;
-		i = 0;
-		index = index->next;
+		global->map->inc -= 1;
 	}
 }
 
@@ -465,19 +506,25 @@ void	down_tilt_map(t_global *global)
 
 	index = global->map;
 	i = 0;
-	decal(global->map, index->p[global->map_lines / 2].y, 0);
-	while (index)
+	if (global->map->inc < 10)
 	{
-		while (index->p[i].next)
+		decal(global->map, index->p[global->map_lines / 2].y, 0);
+		while (index)
 		{
+			while (index->p[i].next)
+			{
+				index->p[i].y *= 0.5;
+				i++;
+			}
 			index->p[i].y *= 0.5;
-			i++;
+			i = 0;
+			index = index->next;
 		}
-		index->p[i].y *= 0.5;
-		i = 0;
-		index = index->next;
+		global->map->inc += 1;
 	}
 }
+
+
 
 void	reload_map(t_global *global,  int zoom, int i, t_coord margin)
 {
@@ -485,9 +532,6 @@ void	reload_map(t_global *global,  int zoom, int i, t_coord margin)
 	global->map->zoom_maj += zoom;
 	global->map->pitch_maj += i;
 
-	//calc_iso(global->map);
-	//change_pitch(global, 1);
-	//decal(global->map, margin.y, margin.x);
 	ft_trace(">>> Erasing old map" ,"...");
 	erase_map(global->env);
 	ft_putendl("Done.");
@@ -498,6 +542,7 @@ void	reload_map(t_global *global,  int zoom, int i, t_coord margin)
 	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
 	ft_putendl("Done.");
 	ft_nbrtrace("Padding value", global->map->padding);
+	print_infos(global);
 }
 
 
@@ -535,15 +580,14 @@ int		my_key_hook(int key_code, t_global *global)
 		decal(global->map, global->map->margin.y, global->map->margin.x);
 		reload_map(global, 0, 0, global->map->margin);
 	}
-
 	else if (key_code == 69)
 	{
-		global->map->padding = inc_padding(global, 2);
+		global->map->padding = inc_padding(global, 2, -1, -1);
 		reload_map(global, 0, 0, global->map->margin);
 	}
 	else if (key_code == 78)
 	{
-		global->map->padding = dec_padding(global, 2);
+		global->map->padding = dec_padding(global, 2, -1, -1);
 		reload_map(global, 0, 0, global->map->margin);
 	}
 	else if (key_code == 3)
@@ -559,6 +603,23 @@ int		my_key_hook(int key_code, t_global *global)
 
 	else if (key_code == 53)
 		exit(0);
+	return (0);
+}
+
+
+int		my_mouse_hook(int button, int x, int y, t_global *global)
+{
+	if (button == 4)
+	{
+		global->map->padding = inc_padding(global, 2, x, y);
+		reload_map(global, 0, 0, global->map->margin);
+	}
+	else if (button == 5)
+	{
+		global->map->padding = dec_padding(global, 2, x, y);
+		reload_map(global, 0, 0, global->map->margin);
+	}
+	printf("mouse hook actived for button %d, in coordinates x = %d y = %d\n", button, x, y);
 	return (0);
 }
 
@@ -583,6 +644,7 @@ void	get_user_params(int ac, char **av, t_global *global)
 	global->colors[2] = 0x0083AB00;
 	global->colors[3] = 0x006C4500;
 	global->colors[4] = 0x00FFFFFF;
+	global->map->inc = 0;
 }
 
 int		main(int argc, char **argv)
@@ -617,8 +679,8 @@ int		main(int argc, char **argv)
 	create_map(&global);
 	ft_putendl("Evrything done.");
 
-
 	mlx_hook(env->wnd, 2, (1L << 0) , &my_key_hook, &global);
+	mlx_hook(env->wnd, 4, 0L , &my_mouse_hook, &global);
 	mlx_loop(env->mlx);
 	return (0);
 }
