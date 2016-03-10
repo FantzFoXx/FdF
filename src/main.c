@@ -44,15 +44,15 @@ int		calc_rgb(int r, int g, int b)
 int		pitch_color(int pitch, t_global *global)
 {
 	if (pitch >= ((global->high_pitch * 50) / 100))	
-		return (0x00FFFFFF);
+		return (global->colors[4]);
 	else if (pitch >= ((global->high_pitch * 15) / 100))	
-		return (0x006C4500);
+		return (global->colors[3]);
 	else if (pitch >= ((global->high_pitch * 10) / 100) || pitch > 0)	
-		return (0x0083AB00);
+		return (global->colors[2]);
 	else if (/*pitch >= 0 &&*/ pitch == 0)	
-		return (0x00004FC6);
+		return (global->colors[1]);
 	else if (pitch < 0)
-		return (0x00D0B15C);
+		return (global->colors[0]);
 	return (0x00FFFFFF);
 }
 
@@ -65,20 +65,16 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 	int	yinc;
 	int	cumul;
 
-
-
-	//ft_trace(NULL, "begin pass");
-	index.x = point_a.x;
-	index.y = point_a.y;
-	d_point.x = point_b.x - point_a.x;
-	d_point.y = point_b.y - point_a.y;
+	index.x = floor(point_a.x);
+	index.y = floor(point_a.y);
+	d_point.x = floor(point_b.x) - floor(point_a.x);
+	d_point.y = floor(point_b.y) - floor(point_a.y);
 	xinc = ( d_point.x > 0 ) ? 1 : -1;
 	yinc = ( d_point.y > 0 ) ? 1 : -1;
-	d_point.x = ABSOL(d_point.x);
-	d_point.y = ABSOL(d_point.y);
+	d_point.x = ABSOL(floor(d_point.x));
+	d_point.y = ABSOL(floor(d_point.y));
 	if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-		img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-		//img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+		img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
 		//img_put_pixel(img, index.x, index.y, calc_rgb((cos(pitch) + 1), (sin(pitch) + 1), (1 - cos(pitch))));
 	if (d_point.x > d_point.y)
 	{
@@ -93,8 +89,8 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 				index.y += yinc; 
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-				//img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+				//img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
+		img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
 		} 
 	}
 	else 
@@ -111,9 +107,8 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 				index.x += xinc; 
 			}
 			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				//img_put_pixel(img, index.x, index.y, color);
-				img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-				//img_put_pixel(img, index.x, index.y, RGB(127.5 * (cos(pitch) + 1), 127.5 * (sin(pitch) + 1), 127.5 * (1 - cos(pitch))));
+				//img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
+		img_put_pixel(img, floor(index.x), floor(index.y), pitch_color(pitch, global));
 		}
 	}
 	//ft_trace(NULL, "end pass");
@@ -246,9 +241,6 @@ static void trace_map(t_meta env, t_map *map, int coef, t_coord margin, t_global
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
 				draw_segment(env.img, apply_pitch(map->p[i], coef, global), apply_pitch(map->p[i + 1], coef, global), map->p[i].pitch, global);
-			//if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
-			//		&& (map->p[i].x >= 0 || map->p[i].y >= 0))
-			//	draw_segment(env.img, apply_pitch(map->next->p[i], coef, global), apply_pitch(map->next->p[i + 1], coef, global), map->p[i].pitch);
 			i++;
 		}
 	else
@@ -403,8 +395,6 @@ double inc_padding(t_global *global, int zoom)
 	return (padding);
 }
 
-
-
 void	create_map(t_global *global)
 {
 
@@ -444,6 +434,48 @@ void	change_pitch(t_global *global, int coef)
 		//map->p[i].y += coef;
 		i = 0;
 		global->map = global->map->next;
+	}
+}
+
+void	up_tilt_map(t_global *global)
+{
+	t_map 	*index;
+	int		i;
+
+	index = global->map;
+	i = 0;
+	decal(global->map, -(index->p[global->map_lines / 2].y) * 0.5, 0);
+	while (index)
+	{
+		while (index->p[i].next)
+		{
+			index->p[i].y /= 0.5;
+			i++;
+		}
+		index->p[i].y /= 0.5;
+		i = 0;
+		index = index->next;
+	}
+}
+
+void	down_tilt_map(t_global *global)
+{
+	t_map 	*index;
+	int		i;
+
+	index = global->map;
+	i = 0;
+	decal(global->map, index->p[global->map_lines / 2].y, 0);
+	while (index)
+	{
+		while (index->p[i].next)
+		{
+			index->p[i].y *= 0.5;
+			i++;
+		}
+		index->p[i].y *= 0.5;
+		i = 0;
+		index = index->next;
 	}
 }
 
@@ -514,6 +546,16 @@ int		my_key_hook(int key_code, t_global *global)
 		global->map->padding = dec_padding(global, 2);
 		reload_map(global, 0, 0, global->map->margin);
 	}
+	else if (key_code == 3)
+	{
+		up_tilt_map(global);
+		reload_map(global, 0, 0, global->map->margin);
+	}
+	else if (key_code == 15)
+	{
+		down_tilt_map(global);
+		reload_map(global, 0, 0, global->map->margin);
+	}
 
 	else if (key_code == 53)
 		exit(0);
@@ -536,6 +578,11 @@ void	get_user_params(int ac, char **av, t_global *global)
 		global->map->pitch_maj = 2;
 		global->map->zoom_maj = 1;
 	}
+	global->colors[0] = 0x00D0B15C;
+	global->colors[1] = 0x00004FC6;
+	global->colors[2] = 0x0083AB00;
+	global->colors[3] = 0x006C4500;
+	global->colors[4] = 0x00FFFFFF;
 }
 
 int		main(int argc, char **argv)
@@ -565,8 +612,6 @@ int		main(int argc, char **argv)
 	ft_putendl("Done.");
 	ft_trace(">>> Charging user preferences" ,"...");
 	get_user_params(argc, argv, &global);
-	//global.map->pitch_maj = 2;
-	//global.map->zoom_maj = 2;
 
 	ft_trace(">>> In create_map" ,"...");
 	create_map(&global);

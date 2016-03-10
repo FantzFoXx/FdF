@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:21:48 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/09 19:03:00 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/10 19:09:15 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct	s_global
 	size_t		map_col;
 	int			high_pitch;
 	int			low_pitch;
+	int			colors[5];
 }				t_global;
 
 void			t_map_push(t_map **first, t_map *new);
