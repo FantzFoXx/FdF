@@ -6,17 +6,17 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:20:22 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/09 19:03:00 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/11 14:58:30 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "libft.h"
 #include "t_map.h"
-//#include "fdf.h"
 #include "catch_errors.h"
 
-t_map		*t_map_new(char *line, size_t line_nb, size_t *size_line, t_global *global)
+t_map	*t_map_new(char *line, size_t line_nb, size_t *size_line
+		, t_global *global)
 {
 	t_map	*new;
 	char	**spl;
@@ -37,26 +37,27 @@ t_map		*t_map_new(char *line, size_t line_nb, size_t *size_line, t_global *globa
 	{
 		new->p = (t_coord *)malloc(sizeof(t_coord) * line_size + 1);
 		i = -1;
-			while (spl[++i])
-			{
-				new->p[i].x = i/* * padding*/;
-				new->p[i].y = line_nb /** padding*/;
-				new->p[i].pitch = ft_atoi(spl[i]);
-				if (new->p[i].pitch > 0 && new->p[i].pitch > global->high_pitch)
-					global->high_pitch = new->p[i].pitch;
-				else if (new->p[i].pitch <= 0 && new->p[i].pitch < global->high_pitch)
-					global->low_pitch = new->p[i].pitch;
-				if (spl[i + 1] != NULL)
-					new->p[i].next = 1;
-				else
-					new->p[i].next = 0;
-			}
+		while (spl[++i])
+		{
+			new->p[i].x = i;
+			new->p[i].y = line_nb;
+			new->p[i].pitch = ft_atoi(spl[i]);
+			if (new->p[i].pitch > 0 && new->p[i].pitch > global->high_pitch)
+				global->high_pitch = new->p[i].pitch;
+			else if (new->p[i].pitch <= 0
+					&& new->p[i].pitch < global->high_pitch)
+				global->low_pitch = new->p[i].pitch;
+			if (spl[i + 1] != NULL)
+				new->p[i].next = 1;
+			else
+				new->p[i].next = 0;
+		}
 		new->next = NULL;
 	}
 	return (new);
 }
 
-void		t_map_push(t_map **first, t_map *new)
+void	t_map_push(t_map **first, t_map *new)
 {
 	t_map *index;
 
@@ -71,4 +72,40 @@ void		t_map_push(t_map **first, t_map *new)
 	}
 }
 
+int		open_file(int ac, char **av)
+{
+	int fd;
 
+	check_params(ac);
+	fd = open(av[1], O_RDONLY);
+	if (fd == -1)
+		catch_errors(1, av[1]);
+	return (fd);
+}
+
+t_map	*init_map(int fd, char *filename, t_global *global)
+{
+	char	*line;
+	t_map	*map;
+	t_map	*index;
+	int		gnl_ret;
+
+	map = NULL;
+	index = map;
+	gnl_ret = 0;
+	global->map_col = 0;
+	global->map_lines = 0;
+	global->high_pitch = 0;
+	global->low_pitch = 0;
+	while ((gnl_ret = get_next_line(fd, &line)) && gnl_ret > 0)
+	{
+		t_map_push(&map, t_map_new(line, global->map_lines
+					, &global->map_col, global));
+		free(line);
+		global->map_lines += 1;
+	}
+	if (gnl_ret == -1 || global->map_lines == 0)
+		catch_errors(3, filename);
+	global->env.map_name = filename;
+	return (map);
+}

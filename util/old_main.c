@@ -248,7 +248,7 @@ void	apply_pitch_map(t_coord *map, t_pitch_map *pitch)
 			i++;
 			x_pitch += 5;
 		}
-			index->y += x_pitch;
+		index->y += x_pitch;
 		pitch = pitch->next;
 		map = map->down;
 	}

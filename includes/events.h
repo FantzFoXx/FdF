@@ -1,17 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   catch_errors.h                                     :+:      :+:    :+:   */
+/*   events.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/03/06 04:14:01 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 16:08:38 by udelorme         ###   ########.fr       */
+/*   Created: 2016/03/11 11:34:53 by udelorme          #+#    #+#             */
+/*   Updated: 2016/03/11 14:45:19 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
+#ifndef EVENTS_H
+# define EVENTS_H
 
-void	catch_errors(int err_code, char *err_msg);
-void	err_bad_usage(void);
-void	check_params(int ac);
+#include "events.h"
+#include "fdf.h"
+#include "t_map.h"
+
+int		my_mouse_hook(int button, int x, int y, t_global *global);
+int		my_key_hook(int key_code, t_global *global);
+void	print_infos(t_global *global);
+
+#endif

@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:21:48 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/10 19:09:15 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/11 11:34:00 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "fdf.h"
 //#include "t_map.h"
+#include <stdlib.h>
 
 typedef struct	s_coord
 {
@@ -50,5 +51,7 @@ typedef struct	s_global
 
 void			t_map_push(t_map **first, t_map *new);
 t_map			*t_map_new(char *line, size_t line_nb, size_t *size_line, t_global *global);
+int 			open_file(int ac, char **av);
+t_map			*init_map(int fd, char *filename, t_global *global);
 
 #endif

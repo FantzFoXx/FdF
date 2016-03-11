@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 04:13:44 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/06 05:15:15 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/11 16:08:03 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-int		catch_errors(int err_code, char *err_msg)
+void	catch_errors(int err_code, char *err_msg)
 {
 	if (err_code == 1)
 	{
@@ -39,11 +39,10 @@ int		catch_errors(int err_code, char *err_msg)
 		ft_putendl("Wrong file data");
 	else if (err_code == 3)
 	{
-			ft_putstr(err_msg);
+		ft_putstr(err_msg);
 		ft_putendl(" is empty");
 	}
 	exit(1);
-	return (err_code);
 }
 
 void	err_bad_usage(void)
@@ -56,8 +55,4 @@ void	check_params(int ac)
 {
 	if (ac != 2 && ac != 4)
 		err_bad_usage();
-	else
-	{
-		
-	}
 }
