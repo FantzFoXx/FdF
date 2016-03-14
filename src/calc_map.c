@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:25:04 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 16:16:02 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/14 17:49:35 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,12 +93,10 @@ int			calc_padding(t_map *map, int zoom)
 
 double		dec_padding(t_global *global, int zoom, int x, int y)
 {
-	int		lines;
 	double	padding;
 	t_map	*index;
 	int		i;
 
-	lines = 0;
 	index = global->map;
 	padding = global->map->padding / zoom;
 	i = 0;
@@ -124,12 +122,10 @@ double		dec_padding(t_global *global, int zoom, int x, int y)
 
 double		inc_padding(t_global *global, int zoom, int x, int y)
 {
-	int		lines;
 	double	padding;
 	t_map	*index;
 	int		i;
 
-	lines = 0;
 	index = global->map;
 	padding = global->map->padding * zoom;
 	i = 0;

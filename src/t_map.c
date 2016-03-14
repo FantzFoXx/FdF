@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:20:22 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 14:58:30 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/14 18:09:23 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,10 @@ t_map	*init_map(int fd, char *filename, t_global *global)
 		free(line);
 		global->map_lines += 1;
 	}
-	if (gnl_ret == -1 || global->map_lines == 0)
-		catch_errors(3, filename);
+	if (gnl_ret == -1)
+		catch_errors(1, filename);
+	if (global->map_lines == 0)
+		catch_errors(2, filename);
 	global->env.map_name = filename;
 	return (map);
 }

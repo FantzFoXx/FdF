@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 04:13:44 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 16:08:03 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/14 18:06:43 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,6 @@ void	catch_errors(int err_code, char *err_msg)
 	}
 	else if (err_code == 2)
 		ft_putendl("Wrong file data");
-	else if (err_code == 3)
-	{
-		ft_putstr(err_msg);
-		ft_putendl(" is empty");
-	}
 	exit(1);
 }
 

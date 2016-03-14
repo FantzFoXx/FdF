@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 06:43:46 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 19:38:09 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/14 18:13:49 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,6 @@
 # define HEIGHT 1400
 # define ABSOL(x) ((x) < 0 ? - (x) : (x))
 # define RGB(r, g, b)(256 * 256 * (int)(r) + 256 * (int)(g) + (int)(b))
-
-//#include "t_map.h"
-//#include "fdf.h"
 
 typedef struct	s_img_prop
 {

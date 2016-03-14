@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 16:47:51 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 16:52:01 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/14 18:09:08 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,29 +26,6 @@
 #include "calc_map.h"
 #include "events.h"
 #include "print_map.h"
-
-/*
-   static void	calc_iso(t_map *map, t_global *global)
-   {
-   (void)global;
-   int i;
-
-   i = 0;
-   while (map)
-   {
-   while (map->p[i].next == 1)
-   {
-   map->p[i].x = ((((map->p[i].x * 2) + (map->p[i].y / 2))) / 2);
-   map->p[i].y = ((((map->p[i].y * 2) + (map->p[i].x / 2))) / 2);
-   i++;
-   }
-   map->p[i].x = ((((map->p[i].x * 2) + (map->p[i].y / 2))) / 2);
-   map->p[i].y = ((((map->p[i].y * 2) + (map->p[i].x / 2))) / 2);
-   i = 0;
-   map = map->next;
-   }
-   }
-   */
 
 void	create_map(t_global *global)
 {

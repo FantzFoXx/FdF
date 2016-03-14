@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:15:53 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/11 19:38:08 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/14 17:47:36 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 
 void		img_put_pixel(t_img_prop img, int x, int y, int color)
 {
-	int	final;
-	unsigned char *col;
+	int				final;
+	unsigned char	*col;
 
 	col = (unsigned char *)&color;
 	x *= (img.bits_per_pixel / 8);
@@ -39,17 +39,19 @@ void	foo1(t_global *global, t_coord index, t_coord d_point, double pitch)
 
 	cumul = d_point.x / 2;
 	i = 1;
-	while (i <= d_point.x) 
+	while (i <= d_point.x)
 	{
 		index.x += global->env.img.xinc;
 		cumul += d_point.y;
-		if (cumul >= d_point.x) 
+		if (cumul >= d_point.x)
 		{
 			cumul -= d_point.x;
-			index.y += global->env.img.yinc; 
+			index.y += global->env.img.yinc;
 		}
-		if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(global->env.img, index.x, index.y, pitch_color(pitch, global));
+		if ((index.x >= 0 && index.y >= 0)
+			&& (index.x < WIDTH && index.y < HEIGHT))
+			img_put_pixel(global->env.img, index.x
+				, index.y, pitch_color(pitch, global));
 		i++;
 	}
 }
@@ -61,22 +63,24 @@ void	foo2(t_global *global, t_coord index, t_coord d_point, double pitch)
 
 	cumul = d_point.y / 2;
 	i = 1;
-	while (i <= d_point.y) 
+	while (i <= d_point.y)
 	{
 		index.y += global->env.img.yinc;
 		cumul += d_point.x;
-		if (cumul >= d_point.y) 
+		if (cumul >= d_point.y)
 		{
 			cumul -= d_point.y;
-			index.x += global->env.img.xinc; 
+			index.x += global->env.img.xinc;
 		}
-		if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(global->env.img, index.x, index.y, pitch_color(pitch, global));
+		if ((index.x >= 0 && index.y >= 0)
+			&& (index.x < WIDTH && index.y < HEIGHT))
+			img_put_pixel(global->env.img, index.x
+				, index.y, pitch_color(pitch, global));
 		i++;
 	}
 }
 
-void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch, t_global *global)
+void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch, t_global *global) // replace img by global
 {
 	t_coord d_point;
 	t_coord index;
@@ -93,66 +97,9 @@ void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch
 		img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
 	if (d_point.x > d_point.y)
 		foo1(global, index, d_point, pitch);
-	else 
+	else
 		foo2(global, index, d_point, pitch);
 }
-
-
-/*
-void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b, double pitch, t_global *global)
-{
-	t_coord d_point;
-	t_coord index;
-	int	i;
-	int	xinc;
-	int	yinc;
-	int	cumul;
-
-	index.x = floor(point_a.x);
-	index.y = floor(point_a.y);
-	d_point.x = floor(point_b.x) - floor(point_a.x);
-	d_point.y = floor(point_b.y) - floor(point_a.y);
-	xinc = (d_point.x > 0) ? 1 : -1;
-	yinc = (d_point.y > 0) ? 1 : -1;
-	d_point.x = ABSOL(floor(d_point.x));
-	d_point.y = ABSOL(floor(d_point.y));
-	if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-		img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-	//img_put_pixel(img, index.x, index.y, calc_rgb((cos(pitch) + 1), (sin(pitch) + 1), (1 - cos(pitch))));
-	if (d_point.x > d_point.y)
-	{
-		cumul = d_point.x / 2;
-		for (i = 1; i <= d_point.x; i++) 
-		{
-			index.x += xinc;
-			cumul += d_point.y;
-			if (cumul >= d_point.x) 
-			{
-				cumul -= d_point.x;
-				index.y += yinc; 
-			}
-			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-		} 
-	}
-	else 
-	{
-		cumul = d_point.y / 2;
-		for (i = 1; i <= d_point.y; i++) 
-		{
-			index.y += yinc;
-			cumul += d_point.x;
-			if (cumul >= d_point.y) 
-			{
-				cumul -= d_point.y;
-				index.x += xinc; 
-			}
-			if ((index.x >= 0 && index.y >= 0) && (index.x < WIDTH && index.y < HEIGHT))
-				img_put_pixel(img, index.x, index.y, pitch_color(pitch, global));
-		}
-	}
-}
-*/
 
 void	trace_map(t_meta env, t_map *map, int coef, t_coord margin, t_global *global)
 {
@@ -166,7 +113,7 @@ void	trace_map(t_meta env, t_map *map, int coef, t_coord margin, t_global *globa
 			if ((map->p[i].x < WIDTH || map->p[i].y < HEIGHT)
 					&& (map->p[i].x >= 0 || map->p[i].y >= 0))
 				draw_segment(env.img, apply_pitch(map->p[i], coef, global)
-						, apply_pitch(map->p[i + 1], coef, global), map->p[i].pitch, global);
+					, apply_pitch(map->p[i + 1], coef, global), map->p[i].pitch, global);
 			i++;
 		}
 	else
@@ -239,5 +186,5 @@ void	erase_map(t_meta env)
 		}
 		i++;
 	}
-	mlx_put_image_to_window (env.mlx, env.wnd, env.img.img_ptr, 0, 0);
+	mlx_put_image_to_window(env.mlx, env.wnd, env.img.img_ptr, 0, 0);
 }
