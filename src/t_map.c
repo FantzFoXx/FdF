@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:20:22 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/14 18:09:23 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 11:25:47 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,34 @@
 #include "t_map.h"
 #include "catch_errors.h"
 
+void	init_t_map(t_map *new, t_global *global, size_t line_nb, char **spl)
+{
+	int i;
+
+	i = -1;
+	while (spl[++i])
+	{
+		new->p[i].x = i;
+		new->p[i].y = line_nb;
+		new->p[i].pitch = ft_atoi(spl[i]);
+		if (new->p[i].pitch > 0 && new->p[i].pitch > global->high_pitch)
+			global->high_pitch = new->p[i].pitch;
+		else if (new->p[i].pitch <= 0
+				&& new->p[i].pitch < global->high_pitch)
+			global->low_pitch = new->p[i].pitch;
+		if (spl[i + 1] != NULL)
+			new->p[i].next = 1;
+		else
+			new->p[i].next = 0;
+	}
+}
+
 t_map	*t_map_new(char *line, size_t line_nb, size_t *size_line
 		, t_global *global)
 {
 	t_map	*new;
 	char	**spl;
-	int		i;
 	size_t	line_size;
-	int		padding;
 
 	line_size = ft_wordcount(line, ' ');
 	if (line_size < 1 || (line_size != *size_line && line_nb > 0))
@@ -31,27 +51,10 @@ t_map	*t_map_new(char *line, size_t line_nb, size_t *size_line
 	spl = ft_strsplit(line, ' ');
 	new = (t_map *)malloc(sizeof(t_map));
 	new->size_line = line_size;
-	i = -1;
-	padding = 10;
 	if (new)
 	{
 		new->p = (t_coord *)malloc(sizeof(t_coord) * line_size + 1);
-		i = -1;
-		while (spl[++i])
-		{
-			new->p[i].x = i;
-			new->p[i].y = line_nb;
-			new->p[i].pitch = ft_atoi(spl[i]);
-			if (new->p[i].pitch > 0 && new->p[i].pitch > global->high_pitch)
-				global->high_pitch = new->p[i].pitch;
-			else if (new->p[i].pitch <= 0
-					&& new->p[i].pitch < global->high_pitch)
-				global->low_pitch = new->p[i].pitch;
-			if (spl[i + 1] != NULL)
-				new->p[i].next = 1;
-			else
-				new->p[i].next = 0;
-		}
+		init_t_map(new, global, line_nb, spl);
 		new->next = NULL;
 	}
 	return (new);

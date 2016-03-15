@@ -6,7 +6,7 @@
 #    By: udelorme <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/01/14 11:43:18 by udelorme          #+#    #+#              #
-#    Updated: 2016/03/11 11:35:12 by udelorme         ###   ########.fr        #
+#    Updated: 2016/03/15 11:27:11 by udelorme         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,8 @@ FLAGS = -Wall -Werror -Wextra -g
 NAME = fdf
 SRC = main.c catch_errors.c	\
 	  t_map.c print_map.c	\
-	  calc_map.c events.c
+	  calc_map.c events.c	\
+	  calc_map_2.c
 OBJ = $(SRC:.c=.o)
 
 SRCDIR = src/
