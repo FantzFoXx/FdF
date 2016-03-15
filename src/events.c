@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:34:57 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 11:29:08 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 14:14:13 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int		my_key_hook(int key_code, t_global *global)
 		global->map->padding = inc_padding(global, 2, -1, -1);
 		reload_map(global, 0, 0, global->map->margin);
 	}
-	else if (key_code == 78)
+	else if (key_code == 78 && global->map->padding > 0.01)
 	{
 		global->map->padding = dec_padding(global, 2, -1, -1);
 		reload_map(global, 0, 0, global->map->margin);

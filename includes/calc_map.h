@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:26:06 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/14 18:13:41 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 13:16:06 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 void		calc_iso(t_map *map, t_global *global);
 t_coord		apply_pitch(t_coord p, int coef, t_global *global);
-int			calc_padding(t_map *map, int zoom);
+int			calc_padding(t_map *map, int zoom, t_global *global);
 double		dec_padding(t_global *global, int zoom, int x, int y);
 double		inc_padding(t_global *global, int zoom, int x, int y);
 int			get_iso_decal(t_global *global);

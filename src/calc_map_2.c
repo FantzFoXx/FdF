@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/15 11:26:52 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 11:29:07 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 14:14:32 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,51 +39,28 @@ void		calc_iso(t_map *map, t_global *global)
 	decal(bak, 0, get_iso_decal(global));
 }
 
-t_coord		apply_pitch(t_coord p, int coef, t_global *global)
+int			calc_padding(t_map *map, int zoom, t_global *global)
 {
-	t_coord pitched;
-
-	pitched.x = p.x;
-	pitched.y = p.y - ((p.pitch * ((coef * (global->map->padding)))) * 0.01);
-	return (pitched);
-}
-
-int			calc_padding(t_map *map, int zoom)
-{
-	int		biggest_line;
-	int		lines;
 	int		padding;
-	t_map	*index;
 	int		i;
 
-	lines = 0;
-	index = map;
-	padding = 1;
-	biggest_line = 0;
-	while (map)
-	{
-		if (biggest_line < map->size_line)
-			biggest_line = map->size_line;
-		map = map->next;
-		lines++;
-	}
-	padding = HEIGHT / lines;
+	padding = HEIGHT / global->map_lines;
 	if (!padding)
 		padding = 1;
 	padding *= zoom;
 	i = 0;
-	while (index)
+	while (map)
 	{
-		while (index->p[i].next)
+		while (map->p[i].next)
 		{
-			index->p[i].x *= padding;
-			index->p[i].y *= padding;
+			map->p[i].x *= padding;
+			map->p[i].y *= padding;
 			i++;
 		}
-		index->p[i].x *= padding;
-		index->p[i].y *= padding;
+		map->p[i].x *= padding;
+		map->p[i].y *= padding;
 		i = 0;
-		index = index->next;
+		map = map->next;
 	}
 	return (ABSOL(padding));
 }
@@ -144,4 +121,13 @@ double		inc_padding(t_global *global, int zoom, int x, int y)
 	else
 		decal(global->map, -(HEIGHT / 2), -(WIDTH / 2));
 	return (padding);
+}
+
+t_coord		apply_pitch(t_coord p, int coef, t_global *global)
+{
+	t_coord pitched;
+
+	pitched.x = p.x;
+	pitched.y = p.y - ((p.pitch * ((coef * (global->map->padding)))) * 0.01);
+	return (pitched);
 }

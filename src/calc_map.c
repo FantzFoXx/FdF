@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:25:04 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 11:29:08 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 13:24:35 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,12 @@ void		change_pitch(t_global *global, int coef)
 	{
 		while (global->map->p[i].next == 1)
 		{
-			global->map->p[i].y += (global->map->p[i].pitch * coef) / global->map->padding;
+			global->map->p[i].y += (global->map->p[i].pitch * coef)
+				/ global->map->padding;
 			i++;
 		}
-		global->map->p[i].y += ((global->map->p[i].pitch * coef) / global->map->padding);
+		global->map->p[i].y += ((global->map->p[i].pitch * coef)
+				/ global->map->padding);
 		i = 0;
 		global->map = global->map->next;
 	}
@@ -121,6 +123,7 @@ void		reload_map(t_global *global, int zoom, int i, t_coord margin)
 	global->map->pitch_maj += i;
 	erase_map(global->env);
 	trace_map(global->env, global->map, global->map->pitch_maj, margin, global);
-	mlx_put_image_to_window(global->env.mlx, global->env.wnd, global->env.img.img_ptr, 0, 0);
+	mlx_put_image_to_window(global->env.mlx, global->env.wnd
+		, global->env.img.img_ptr, 0, 0);
 	print_infos(global);
 }

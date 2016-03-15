@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 16:47:51 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/14 18:09:08 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 13:43:31 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 
 void	create_map(t_global *global)
 {
-	global->map->padding = calc_padding(global->map, global->map->zoom_maj);
+	global->map->padding =
+		calc_padding(global->map, global->map->zoom_maj, global);
 	calc_iso(global->map, global);
 	global->map->margin.y = 20;
 	global->map->margin.x = 20;
@@ -41,20 +42,10 @@ void	create_map(t_global *global)
 	print_infos(global);
 }
 
-void	get_user_params(int ac, char **av, t_global *global)
+void	init_params(t_global *global)
 {
-	if (ac == 4)
-	{
-		global->map->pitch_maj = ft_atoi(av[2]);
-		global->map->zoom_maj = ft_atoi(av[3]);
-		if (global->map->zoom_maj == 0)
-			global->map->zoom_maj = 1;
-	}
-	else
-	{
-		global->map->pitch_maj = 2;
-		global->map->zoom_maj = 1;
-	}
+	global->map->pitch_maj = 2;
+	global->map->zoom_maj = 1;
 	global->colors[0] = 0x00D0B15C;
 	global->colors[1] = 0x00004FC6;
 	global->colors[2] = 0x0083AB00;
@@ -78,7 +69,7 @@ int		main(int argc, char **argv)
 	env->img.img_ptr = mlx_new_image(env->mlx, WIDTH, HEIGHT);
 	env->img.img_addr = mlx_get_data_addr(env->img.img_ptr
 	, &(env->img.bits_per_pixel), &(env->img.size_line), &(env->img.endian));
-	get_user_params(argc, argv, &global);
+	init_params(&global);
 	create_map(&global);
 	mlx_hook(env->wnd, 2, (1L << 0), &my_key_hook, &global);
 	mlx_hook(env->wnd, 4, 0L, &my_mouse_hook, &global);

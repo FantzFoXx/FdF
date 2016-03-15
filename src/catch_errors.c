@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 04:13:44 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/14 18:06:43 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 13:44:17 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,12 @@ void	catch_errors(int err_code, char *err_msg)
 
 void	err_bad_usage(void)
 {
-	ft_putendl("Usage : ./fdf <filename> [ case_size z_size ]");
+	ft_putendl("Usage : ./fdf <filename>");
 	exit(1);
 }
 
 void	check_params(int ac)
 {
-	if (ac != 2 && ac != 4)
+	if (ac != 2)
 		err_bad_usage();
 }
