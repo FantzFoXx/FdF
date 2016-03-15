@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:26:06 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 13:16:06 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 16:46:36 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,6 @@ void		decal(t_map *map, int value_up, int value_down);
 void		change_pitch(t_global *global, int coef);
 void		up_tilt_map(t_global *global);
 void		down_tilt_map(t_global *global);
-void		reload_map(t_global *global, int zoom, int i, t_coord margin);
+void		reload_map(t_global *global, int zoom, int i);
 
 #endif

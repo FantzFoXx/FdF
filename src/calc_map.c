@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:25:04 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 13:24:35 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 16:00:59 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,33 @@ int			get_iso_decal(t_global *global)
 	while (map->next)
 		map = map->next;
 	return (ABSOL(map->p[0].x));
+}
+
+void		calc_iso(t_map *map, t_global *global)
+{
+	t_map	*bak;
+	int		i;
+	int		x_bak;
+	int		y_bak;
+
+	i = 0;
+	x_bak = 0;
+	y_bak = 0;
+	bak = map;
+	while (map)
+	{
+		while (map->p[i].next == 1)
+		{
+			map->p[i].x = ((map->p[i].x - map->p[i].y) / 2);
+			map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
+			i++;
+		}
+		map->p[i].x = ((map->p[i].x - map->p[i].y) / 2);
+		map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
+		i = 0;
+		map = map->next;
+	}
+	decal(bak, 0, get_iso_decal(global));
 }
 
 void		decal(t_map *map, int value_up, int value_down)
@@ -44,26 +71,6 @@ void		decal(t_map *map, int value_up, int value_down)
 		index->p[i].x += value_down;
 		index = index->next;
 		i = 0;
-	}
-}
-
-void		change_pitch(t_global *global, int coef)
-{
-	int		i;
-
-	i = 0;
-	while (global->map)
-	{
-		while (global->map->p[i].next == 1)
-		{
-			global->map->p[i].y += (global->map->p[i].pitch * coef)
-				/ global->map->padding;
-			i++;
-		}
-		global->map->p[i].y += ((global->map->p[i].pitch * coef)
-				/ global->map->padding);
-		i = 0;
-		global->map = global->map->next;
 	}
 }
 
@@ -115,15 +122,4 @@ void		down_tilt_map(t_global *global)
 		}
 		global->map->inc += 1;
 	}
-}
-
-void		reload_map(t_global *global, int zoom, int i, t_coord margin)
-{
-	global->map->zoom_maj += zoom;
-	global->map->pitch_maj += i;
-	erase_map(global->env);
-	trace_map(global->env, global->map, global->map->pitch_maj, margin, global);
-	mlx_put_image_to_window(global->env.mlx, global->env.wnd
-		, global->env.img.img_ptr, 0, 0);
-	print_infos(global);
 }

@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 16:47:51 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 13:43:31 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 16:47:55 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,20 @@ void	create_map(t_global *global)
 	global->map->margin.y = 20;
 	global->map->margin.x = 20;
 	decal(global->map, global->map->margin.y, global->map->margin.x);
-	trace_map(global->env, global->map, global->map->pitch_maj
-			, global->map->margin, global);
+	trace_map(global->map, global->map->pitch_maj, global);
 	mlx_put_image_to_window(global->env.mlx, global->env.wnd
 			, global->env.img.img_ptr, 0, 0);
+	print_infos(global);
+}
+
+void	reload_map(t_global *global, int zoom, int i)
+{
+	global->map->zoom_maj += zoom;
+	global->map->pitch_maj += i;
+	erase_map(global->env);
+	trace_map(global->map, global->map->pitch_maj, global);
+	mlx_put_image_to_window(global->env.mlx, global->env.wnd
+		, global->env.img.img_ptr, 0, 0);
 	print_infos(global);
 }
 

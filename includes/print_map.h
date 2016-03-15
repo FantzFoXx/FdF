@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:16:26 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/14 18:11:48 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 16:43:56 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,9 @@
 # include <stdlib.h>
 
 void	img_put_pixel(t_img_prop img, int x, int y, int color);
-void	draw_segment(t_img_prop img, t_coord point_a, t_coord point_b
+void	draw_segment(t_coord point_a, t_coord point_b
 		, double pitch, t_global *global);
-void	trace_map(t_meta env, t_map *map, int coef, t_coord margin
-		, t_global *global);
+void	trace_map(t_map *map, int coef, t_global *global);
 int		calc_rgb(int r, int g, int b);
 int		pitch_color(int pitch, t_global *global);
 void	erase_map(t_meta env);

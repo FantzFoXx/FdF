@@ -6,38 +6,11 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/15 11:26:52 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 14:14:32 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/15 16:00:24 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "calc_map.h"
-
-void		calc_iso(t_map *map, t_global *global)
-{
-	t_map	*bak;
-	int		i;
-	int		x_bak;
-	int		y_bak;
-
-	i = 0;
-	x_bak = 0;
-	y_bak = 0;
-	bak = map;
-	while (map)
-	{
-		while (map->p[i].next == 1)
-		{
-			map->p[i].x = ((map->p[i].x - map->p[i].y) / 2);
-			map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
-			i++;
-		}
-		map->p[i].x = ((map->p[i].x - map->p[i].y) / 2);
-		map->p[i].y = ((map->p[i].y + map->p[i].x) / 1.5);
-		i = 0;
-		map = map->next;
-	}
-	decal(bak, 0, get_iso_decal(global));
-}
 
 int			calc_padding(t_map *map, int zoom, t_global *global)
 {
@@ -130,4 +103,24 @@ t_coord		apply_pitch(t_coord p, int coef, t_global *global)
 	pitched.x = p.x;
 	pitched.y = p.y - ((p.pitch * ((coef * (global->map->padding)))) * 0.01);
 	return (pitched);
+}
+
+void		change_pitch(t_global *global, int coef)
+{
+	int		i;
+
+	i = 0;
+	while (global->map)
+	{
+		while (global->map->p[i].next == 1)
+		{
+			global->map->p[i].y += (global->map->p[i].pitch * coef)
+				/ global->map->padding;
+			i++;
+		}
+		global->map->p[i].y += ((global->map->p[i].pitch * coef)
+				/ global->map->padding);
+		i = 0;
+		global->map = global->map->next;
+	}
 }
