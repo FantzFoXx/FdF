@@ -6,12 +6,12 @@
 #    By: udelorme <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/01/14 11:43:18 by udelorme          #+#    #+#              #
-#    Updated: 2016/03/16 08:59:30 by udelorme         ###   ########.fr        #
+#    Updated: 2016/03/16 10:50:59 by udelorme         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = clang
-FLAGS = -Wall -Werror -Wextra -g
+FLAGS = -Wall -Werror -Wextra
 NAME = fdf
 SRC = main.c catch_errors.c			\
 	  t_map.c print_map.c			\

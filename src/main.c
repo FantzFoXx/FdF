@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 16:47:51 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/16 09:18:57 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/16 10:47:38 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,6 @@
 #include "t_map.h"
 #include "fdf.h"
 #include "mlx.h"
-#include <math.h>
-#include "libft.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include "libft.h"
-#include "get_next_line.h"
-#include "catch_errors.h"
-#include <math.h>
 #include "calc_map.h"
 #include "events.h"
 #include "print_map.h"

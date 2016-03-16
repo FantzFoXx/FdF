@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/11 11:15:53 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/16 08:07:34 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/16 10:41:00 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,9 +103,9 @@ void	draw_segment(t_coord point_a, t_coord point_b, double pitch
 
 int		pitch_color(int pitch, t_global *global)
 {
-	if (pitch >= ((global->high_pitch * 50) / 100))
+	if (pitch >= ((global->high_pitch * 70) / 100))
 		return (global->colors[4]);
-	else if (pitch >= ((global->high_pitch * 15) / 100))
+	else if (pitch >= ((global->high_pitch * 25) / 100))
 		return (global->colors[3]);
 	else if (pitch >= ((global->high_pitch * 10) / 100) || pitch > 0)
 		return (global->colors[2]);
