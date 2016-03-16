@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:20:22 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/15 11:25:47 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/16 09:16:56 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ t_map	*t_map_new(char *line, size_t line_nb, size_t *size_line
 		init_t_map(new, global, line_nb, spl);
 		new->next = NULL;
 	}
+	ft_freetab(spl);
 	return (new);
 }
 

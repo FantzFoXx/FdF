@@ -6,7 +6,7 @@
 /*   By: udelorme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/03/06 05:21:48 by udelorme          #+#    #+#             */
-/*   Updated: 2016/03/14 18:14:38 by udelorme         ###   ########.fr       */
+/*   Updated: 2016/03/16 09:16:58 by udelorme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,5 +53,6 @@ t_map			*t_map_new(char *line, size_t line_nb
 				, size_t *size_line, t_global *global);
 int				open_file(int ac, char **av);
 t_map			*init_map(int fd, char *filename, t_global *global);
+void			free_global(t_global *global);
 
 #endif
